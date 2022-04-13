@@ -12,6 +12,7 @@ import {
 } from "@chakra-ui/react";
 import Header from "./Header";
 import ChapterCard from "./ChapterCard";
+import SubtopicModal from "./SubtopicModal";
 
 const TrackerV2 = () => {
   const [textbooks, setTextbooks] = useState([]);
@@ -19,6 +20,8 @@ const TrackerV2 = () => {
   const [selectedTextbook, setSelectedTextbook] = useState(null);
   const [selectedChapters, setSelectedChapters] = useState([]);
   const [colorIdx, setColor] = useState(-1);
+  const [modalChapter, setModalChapter] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   const getTextbooks = async () => {
     const response = await fetch("http://localhost:3001/course/textbooks");
@@ -56,7 +59,7 @@ const TrackerV2 = () => {
     "#007a93",
   ];
 
-  const cycleColorList = (chapterId) => {
+  const cycleColorList = () => {
     setColor((prevColor) => (prevColor < colorList.length ? prevColor + 1 : 0));
   };
 
@@ -74,6 +77,11 @@ const TrackerV2 = () => {
         { ...chapter, colorIdx },
       ]);
     }
+  };
+
+  const onChapterClick = (chapter) => {
+    setModalChapter(chapter);
+    setShowModal(true);
   };
 
   return (
@@ -129,17 +137,22 @@ const TrackerV2 = () => {
             })}
           </Select>
         </Flex>
+        <Button onClick={() => onChapterClick(1)}>Test</Button>
         <Flex wrap="wrap">
-          {selectedChapters.map(({ name, chapter_id, colorIdx }) => {
+          {selectedChapters.map((chapter) => {
             return (
-              <ChapterCard
-                key={chapter_id}
-                name={name}
-                color={colorList[colorIdx]}
-              />
+              <span key={chapter.chapter_id} onClick={() => onChapterClick(chapter)}>
+                <ChapterCard
+                  name={chapter.name}
+                  color={colorList[chapter.colorIdx]}
+                />
+              </span>
             );
           })}
         </Flex>
+        {showModal && (
+          <SubtopicModal chapter={modalChapter} isOpen={showModal} onClose={setShowModal} />
+        )}
       </Container>
     </>
   );
