@@ -12,12 +12,19 @@ import {
   Flex,
   Checkbox,
   CheckboxGroup,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
+  Box,
 } from "@chakra-ui/react";
 
 const SubtopicModal = ({ chapter, isOpen, onClose }) => {
   const { name, chapter_id } = chapter;
   const [subtopics, setSubTopics] = useState([]);
   const [checkedTopicIds, setCheckedTopicIds] = useState([]);
+  const [numPasses, setNumPasses] = useState({});
 
   const getSubtopics = async (chapterId) => {
     const response = await fetch(
@@ -32,16 +39,32 @@ const SubtopicModal = ({ chapter, isOpen, onClose }) => {
     setCheckedTopicIds(ids);
   };
 
+  const onStepperChange = (stepperValue, subchapterId) => {
+    setNumPasses((prev) => {
+      return { ...prev, [subchapterId]: stepperValue };
+    });
+  };
+
   const onSave = () => {
     const progress = subtopics.filter(({ subchapter_id }) =>
       checkedTopicIds.includes(subchapter_id)
     );
-    console.log(progress);
+    const progressWithPasses = progress.map((each) => {
+      return {
+        ...each,
+        ...(numPasses[each.subchapter_id] && {
+          passes: numPasses[each.subchapter_id],
+          complete: true,
+        }),
+      };
+    });
+    console.log(progressWithPasses);
   };
 
   useEffect(() => {
     getSubtopics(chapter_id);
   }, []);
+
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose}>
@@ -57,9 +80,25 @@ const SubtopicModal = ({ chapter, isOpen, onClose }) => {
               >
                 {subtopics.map(({ Name, subchapter_id }) => {
                   return (
-                    <Flex justify="space-between">
+                    <Flex key={subchapter_id} justify="space-between">
                       <Text>{Name}</Text>
-                      <Checkbox value={subchapter_id} />
+                      <Flex gap={2}>
+                        <NumberInput
+                          size="xs"
+                          maxW={16}
+                          onChange={(value) =>
+                            onStepperChange(value, subchapter_id)
+                          }
+                          min={0}
+                        >
+                          <NumberInputField />
+                          <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                          </NumberInputStepper>
+                        </NumberInput>
+                        <Checkbox value={subchapter_id} />
+                      </Flex>
                     </Flex>
                   );
                 })}
