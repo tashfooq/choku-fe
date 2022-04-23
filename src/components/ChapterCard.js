@@ -6,7 +6,7 @@ const ChapterCard = ({ name, color }) => {
     <>
       <Box
         m={3}
-        p={1}
+        p={6}
         maxW="sm"
         borderWidth={1}
         borderLeftWidth={5}
