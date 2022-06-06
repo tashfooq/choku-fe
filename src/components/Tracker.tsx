@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Accordion, Button, Select } from "@mantine/core";
+import { Accordion, Button, Select, Tab, Table } from "@mantine/core";
 
 const Tracker = () => {
   const [textbooks, setTextbooks] = useState([]);
   const [chapters, setChapters] = useState([]);
-  const [value, setValue] = useState<string | null>("");
+  const [value, setValue] = useState<string | null>(""); //these needs to be renamed to something more appropriate
+  const [subTopics, setSubTopics] = useState<any[]>([]); //figure out a more appropriate type for this and avoid using any
 
   const getTextbooks = async () => {
     const response = await fetch("http://localhost:3001/course/textbooks");
@@ -18,6 +19,19 @@ const Tracker = () => {
     );
     const { chapters } = await response.json();
     setChapters(chapters);
+  };
+
+  const getSubtopics = async (chapterId: number) => {
+    const response = await fetch(
+      `http://localhost:3001/course/subtopic/${chapterId}`
+    );
+    const { subtopics } = await response.json();
+    if (
+      subTopics.filter((topic) => topic.chapter_id === chapterId).length !== 0
+    ) {
+      return;
+    }
+    setSubTopics((prev) => [...prev, ...subtopics]);
   };
 
   useEffect(() => {
@@ -43,10 +57,29 @@ const Tracker = () => {
         })}
       />
       <Accordion>
-        {chapters.map(({chapter_id, name}) => {
-          return <Accordion.Item key={chapter_id} label={name}></Accordion.Item>
+        {chapters.map(({ chapter_id, name }) => {
+          return (
+            <Accordion.Item
+              key={chapter_id}
+              label={name}
+              onClick={() => getSubtopics(chapter_id)}
+            >
+              <Table>
+                <tbody>
+                  {subTopics
+                    .filter((topic) => topic.chapter_id === chapter_id)
+                    .map(({ Name, subchapter_id }) => {
+                      return (
+                        <tr>
+                          <td>{Name}</td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </Table>
+            </Accordion.Item>
+          );
         })}
-        
       </Accordion>
       <p>{value}</p>
     </>
