@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Accordion, Button, Select, Tab, Table } from "@mantine/core";
+import {
+  AppShell,
+  Header,
+  Container,
+  Group,
+  Accordion,
+  Button,
+  Select,
+  Tab,
+  Table,
+  NumberInput,
+} from "@mantine/core";
+import { CircleDashed, CircleCheck, Book } from "tabler-icons-react";
 
 const Tracker = () => {
   const [textbooks, setTextbooks] = useState([]);
@@ -34,6 +46,25 @@ const Tracker = () => {
     setSubTopics((prev) => [...prev, ...subtopics]);
   };
 
+  const updatedProgress = (subchapterId: number) => {
+    const toMutate = subTopics.find(
+      (topic) => topic.subchapter_id === subchapterId
+    );
+    const toMutateIdx = subTopics.findIndex(
+      (topic) => topic.subchapter_id === subchapterId
+    );
+    const copy = [...subTopics];
+    if (toMutate.checked === undefined || toMutate.checked === false) {
+      const mutated = { ...toMutate, checked: true };
+      copy[toMutateIdx] = mutated;
+      setSubTopics(copy);
+    } else {
+      const mutated = { ...toMutate, checked: false };
+      copy[toMutateIdx] = mutated;
+      setSubTopics(copy);
+    }
+  };
+
   useEffect(() => {
     getTextbooks();
   }, []);
@@ -46,43 +77,69 @@ const Tracker = () => {
   }, [value]);
 
   return (
-    <>
-      <Button onClick={() => console.log(chapters)}>Tracker</Button>
-      <Select
-        value={value}
-        placeholder="Pick a resource"
-        onChange={setValue}
-        data={textbooks.map(({ textbook_id, name }) => {
-          return { value: textbook_id, label: name };
-        })}
-      />
-      <Accordion>
-        {chapters.map(({ chapter_id, name }) => {
-          return (
-            <Accordion.Item
-              key={chapter_id}
-              label={name}
-              onClick={() => getSubtopics(chapter_id)}
-            >
-              <Table>
-                <tbody>
-                  {subTopics
-                    .filter((topic) => topic.chapter_id === chapter_id)
-                    .map(({ Name, subchapter_id }) => {
-                      return (
-                        <tr>
-                          <td>{Name}</td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </Table>
-            </Accordion.Item>
-          );
-        })}
-      </Accordion>
-      <p>{value}</p>
-    </>
+      <Container size="md" px="md">
+        <Group style={{ margin: 10 }} position="apart">
+          <Select
+            value={value}
+            placeholder="Pick a resource"
+            onChange={setValue}
+            data={textbooks.map(({ textbook_id, name }) => {
+              return { value: textbook_id, label: name };
+            })}
+          />
+          <Button onClick={() => console.log(chapters)}>Save</Button>
+        </Group>
+        <Accordion>
+          {chapters.map(({ chapter_id, name }) => {
+            return (
+              <Accordion.Item
+                key={chapter_id}
+                label={name}
+                onClick={() => getSubtopics(chapter_id)}
+              >
+                <Table>
+                  <tbody>
+                    {subTopics
+                      .filter((topic) => topic.chapter_id === chapter_id)
+                      .map(({ Name, subchapter_id }, index) => {
+                        return (
+                          <tr key={subchapter_id}>
+                            <td>{Name}</td>
+                            <td>
+                              <div
+                                onClick={() => updatedProgress(subchapter_id)}
+                              >
+                                {subTopics.find(
+                                  (ele) => ele.subchapter_id === subchapter_id
+                                ).checked === undefined ||
+                                subTopics.find(
+                                  (ele) => ele.subchapter_id === subchapter_id
+                                ).checked === false ? (
+                                  <CircleDashed />
+                                ) : (
+                                  <CircleCheck color="green" />
+                                )}
+                              </div>
+                            </td>
+                            <tr>
+                              <NumberInput
+                                // label="Passes"
+                                placeholder="Number of passes"
+                                min={0}
+                                icon={<Book size={18} />}
+                              />
+                            </tr>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </Table>
+              </Accordion.Item>
+            );
+          })}
+        </Accordion>
+        <p>{value}</p>
+      </Container>
   );
 };
 
