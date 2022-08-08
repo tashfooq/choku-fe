@@ -12,7 +12,7 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { Link } from "react-router-dom";
-import { Home, Track, Tallymarks} from "tabler-icons-react";
+import { IconHome, IconTrack, IconTallymarks} from "@tabler/icons";
 
 type ShellProps = {
   content: React.ReactNode;
@@ -43,7 +43,7 @@ const Shell = ({ content }: ShellProps) => {
         >
           <div style={{display: "flex", alignItems: "center"}}>
           <ThemeIcon mr={10}>
-            <Home />
+            <IconHome />
           </ThemeIcon>
           <Text<typeof Link> component={Link} to="/">
             Home
@@ -51,7 +51,7 @@ const Shell = ({ content }: ShellProps) => {
           </div>
           <div style={{display: "flex", alignItems: "center", marginTop: 10}}>
           <ThemeIcon mr={10}>
-            <Track />
+            <IconTrack />
           </ThemeIcon>
           <Text<typeof Link> component={Link} to="/tracker">
             Tracker
@@ -80,7 +80,7 @@ const Shell = ({ content }: ShellProps) => {
             </MediaQuery>
 
             <ThemeIcon mr={10} size="xl" variant="gradient" gradient={{from: 'purple', to: "cyan"}}>
-              <Tallymarks />
+              <IconTallymarks />
             </ThemeIcon>
             <Title order={3}>Choku</Title>
           </div>

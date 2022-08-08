@@ -8,7 +8,14 @@ import {
   Table,
   NumberInput,
 } from "@mantine/core";
-import { CircleDashed, CircleCheck, Book, DeviceFloppy, Settings } from "tabler-icons-react";
+import {
+  IconCircleDashed,
+  IconCircleCheck,
+  IconBook,
+  IconDeviceFloppy,
+  IconSettings,
+} from "@tabler/icons";
+import TrackerSettings from "./TrackerSettings";
 
 const Tracker = () => {
   const [textbooks, setTextbooks] = useState([]);
@@ -17,6 +24,7 @@ const Tracker = () => {
     ""
   ); //these needs to be renamed to something more appropriate
   const [subTopics, setSubTopics] = useState<any[]>([]); //figure out a more appropriate type for this and avoid using any
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
   const getTextbooks = async () => {
     const response = await fetch("http://localhost:3001/course/textbooks");
@@ -97,8 +105,19 @@ const Tracker = () => {
           })}
         />
         <div>
-          <Button leftIcon={<Settings size={18} />} style={{marginRight: 10}}>Change tracker settings</Button>
-          <Button leftIcon={<DeviceFloppy size={18} />} onClick={() => console.log(chapters)}>Save</Button>
+          <Button
+            leftIcon={<IconSettings size={18} />}
+            style={{ marginRight: 10 }}
+            onClick={() => setSettingsModalOpen(true)}
+          >
+            Change tracker settings
+          </Button>
+          <Button
+            leftIcon={<IconDeviceFloppy size={18} />}
+            onClick={() => console.log(chapters)}
+          >
+            Save
+          </Button>
         </div>
       </Group>
       <Accordion>
@@ -129,9 +148,9 @@ const Tracker = () => {
                               subTopics.find(
                                 (ele) => ele.subchapter_id === subchapter_id
                               ).checked === false ? (
-                                <CircleDashed />
+                                <IconCircleDashed />
                               ) : (
-                                <CircleCheck color="green" />
+                                <IconCircleCheck color="green" />
                               )}
                             </div>
                           </td>
@@ -139,8 +158,8 @@ const Tracker = () => {
                             <NumberInput
                               // label="Passes"
                               placeholder="Number of passes"
-                              min={0}
-                              icon={<Book size={18} />}
+                              min={1}
+                              icon={<IconBook size={18} />}
                               onChange={(value) =>
                                 updateProgress(subchapter_id, false, value)
                               }
@@ -155,6 +174,10 @@ const Tracker = () => {
           );
         })}
       </Accordion>
+      <TrackerSettings
+        isOpen={settingsModalOpen}
+        closer={setSettingsModalOpen}
+      />
     </Container>
   );
 };
