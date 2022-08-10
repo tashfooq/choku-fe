@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import {
   Text,
   Box,
@@ -10,7 +10,14 @@ import {
   Progress,
 } from "@mantine/core";
 import { IconCheck, IconX, IconAt } from "@tabler/icons";
+import { useForm } from "@mantine/form";
 
+type FormInput = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+};
 const PasswordRequirement = ({
   meets,
   label,
@@ -54,6 +61,10 @@ const requirements = [
 ];
 
 const SignUp = () => {
+  const form = useForm<FormInput>({
+    initialValues: { firstName: "", lastName: "", email: "", password: "" },
+    // add validation for email here
+  });
   const [popoverOpened, setPopoverOpened] = useState(false);
   const [password, setPassword] = useState("");
   const checks = requirements.map((requirement, index) => (
@@ -82,46 +93,65 @@ const SignUp = () => {
   return (
     <Center>
       <div style={styles.formWrapper}>
-        <TextInput label="First Name" style={styles.inputSpacer} />
-        <TextInput label="Last Name" style={styles.inputSpacer} />
-        <TextInput label="Email" style={styles.inputSpacer} icon={<IconAt size={14} />} />
-        <Popover
-          opened={popoverOpened}
-          position="bottom"
-          width="target"
-          transition="pop"
-        >
-          <Popover.Target>
-            <div
-              onFocusCapture={() => setPopoverOpened(true)}
-              onBlurCapture={() => setPopoverOpened(false)}
-            >
-              <PasswordInput
-                required
-                label="Your password"
-                placeholder="Your password"
-                value={password}
-                onChange={(event) => setPassword(event.currentTarget.value)}
+        <form onSubmit={form.onSubmit((values) => console.log(values))}>
+          <TextInput
+            required
+            label="First Name"
+            style={styles.inputSpacer}
+            {...form.getInputProps("firstName")}
+          />
+          <TextInput
+            required
+            label="Last Name"
+            style={styles.inputSpacer}
+            {...form.getInputProps("lastName")}
+          />
+          <TextInput
+            required
+            label="Email"
+            style={styles.inputSpacer}
+            icon={<IconAt size={14} />}
+            {...form.getInputProps("email")}
+          />
+          <Popover
+            opened={popoverOpened}
+            position="bottom"
+            width="target"
+            transition="pop"
+          >
+            <Popover.Target>
+              <div
+                onFocusCapture={() => setPopoverOpened(true)}
+                onBlurCapture={() => setPopoverOpened(false)}
+              >
+                <PasswordInput
+                  required
+                  label="Your password"
+                  placeholder="Your password"
+                  value={password}
+                  onChange={(event) => setPassword(event.currentTarget.value)}
+                  {...form.getInputProps("password")}
+                />
+              </div>
+            </Popover.Target>
+            <Popover.Dropdown>
+              <Progress
+                color={color}
+                value={strength}
+                size={5}
+                style={{ marginBottom: 10 }}
               />
-            </div>
-          </Popover.Target>
-          <Popover.Dropdown>
-            <Progress
-              color={color}
-              value={strength}
-              size={5}
-              style={{ marginBottom: 10 }}
-            />
-            <PasswordRequirement
-              label="Includes at least 6 characters"
-              meets={password.length > 5}
-            />
-            {checks}
-          </Popover.Dropdown>
-        </Popover>
-        <div style={styles.buttonStyle}>
-          <Button>Sign Up</Button>
-        </div>
+              <PasswordRequirement
+                label="Includes at least 6 characters"
+                meets={password.length > 5}
+              />
+              {checks}
+            </Popover.Dropdown>
+          </Popover>
+          <div style={styles.buttonStyle}>
+            <Button type="submit">Sign Up</Button>
+          </div>
+        </form>
       </div>
     </Center>
   );
