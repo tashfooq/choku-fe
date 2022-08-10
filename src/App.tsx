@@ -17,7 +17,10 @@ function App() {
         <Routes>
           <Route index element={<Shell content={<Home />} />} />
           <Route path="home" element={<Shell content={<Home />} />} />
-          <Route path="signup" element={<SignUp />} />
+          <Route
+            path="signup"
+            element={<Shell showNavbar={false} content={<SignUp />} />}
+          />
           <Route path="login" element={<LogIn />} />
           {/* <Route path="tracker" element={<Tracker />} /> */}
           <Route path="tracker" element={<Shell content={<Tracker />} />} />

@@ -9,7 +9,7 @@ import {
   Popover,
   Progress,
 } from "@mantine/core";
-import { IconCheck, IconX } from "@tabler/icons";
+import { IconCheck, IconX, IconAt } from "@tabler/icons";
 
 const PasswordRequirement = ({
   meets,
@@ -82,9 +82,9 @@ const SignUp = () => {
   return (
     <Center>
       <div style={styles.formWrapper}>
-        <TextInput style={styles.inputSpacer} />
-        <TextInput style={styles.inputSpacer} />
-        <TextInput style={styles.inputSpacer} />
+        <TextInput label="First Name" style={styles.inputSpacer} />
+        <TextInput label="Last Name" style={styles.inputSpacer} />
+        <TextInput label="Email" style={styles.inputSpacer} icon={<IconAt size={14} />} />
         <Popover
           opened={popoverOpened}
           position="bottom"

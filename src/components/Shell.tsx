@@ -12,13 +12,23 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { Link } from "react-router-dom";
-import { IconHome, IconTrack, IconTallymarks} from "@tabler/icons";
+import { IconHome, IconTrack, IconTallymarks } from "@tabler/icons";
+import Sidebar from "./Sidebar";
+import Topbar from "./Topbar";
 
 type ShellProps = {
   content: React.ReactNode;
+  showHeader?: boolean;
+  showFooter?: boolean;
+  showNavbar?: boolean;
 };
 
-const Shell = ({ content }: ShellProps) => {
+const Shell = ({
+  content,
+  showHeader = true,
+  showFooter = true,
+  showNavbar = true,
+}: ShellProps) => {
   const theme = useMantineTheme();
   const [opened, setOpened] = useState(false);
   return (
@@ -34,57 +44,16 @@ const Shell = ({ content }: ShellProps) => {
       navbarOffsetBreakpoint="sm"
       fixed
       //the nav items can be a dumb component that takes link, label and icon as props
-      navbar={
-        <Navbar
-          p="md"
-          hiddenBreakpoint="xl"
-          hidden={!opened}
-          width={{ sm: 200, lg: 300 }}
-        >
-          <div style={{display: "flex", alignItems: "center"}}>
-          <ThemeIcon mr={10}>
-            <IconHome />
-          </ThemeIcon>
-          <Text<typeof Link> component={Link} to="/">
-            Home
-          </Text>
-          </div>
-          <div style={{display: "flex", alignItems: "center", marginTop: 10}}>
-          <ThemeIcon mr={10}>
-            <IconTrack />
-          </ThemeIcon>
-          <Text<typeof Link> component={Link} to="/tracker">
-            Tracker
-          </Text>
-          </div>
-        </Navbar>
-      }
+      navbar={showNavbar ? <Sidebar opened={opened} /> : undefined}
       footer={
         <Footer height={60} p="md">
           Application footer
         </Footer>
       }
       header={
-        <Header height={70} p="md">
-          <div
-            style={{ display: "flex", alignItems: "center", height: "100%" }}
-          >
-            <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-              <Burger
-                opened={opened}
-                onClick={() => setOpened((o) => !o)}
-                size="sm"
-                color={theme.colors.gray[6]}
-                mr="xl"
-              />
-            </MediaQuery>
-
-            <ThemeIcon mr={10} size="xl" variant="gradient" gradient={{from: 'purple', to: "cyan"}}>
-              <IconTallymarks />
-            </ThemeIcon>
-            <Title order={3}>Choku</Title>
-          </div>
-        </Header>
+        showHeader ? (
+          <Topbar opened={opened} setOpened={setOpened} />
+        ) : undefined
       }
     >
       {content}
