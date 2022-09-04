@@ -44,11 +44,14 @@ const Shell = ({
       navbarOffsetBreakpoint="sm"
       fixed
       //the nav items can be a dumb component that takes link, label and icon as props
+      // navbar={showNavbar ? <Sidebar opened={opened} /> : undefined}
       navbar={showNavbar ? <Sidebar opened={opened} /> : undefined}
       footer={
-        <Footer height={60} p="md">
-          Application footer
-        </Footer>
+        showFooter ? (
+          <Footer height={60} p="md">
+            Application footer
+          </Footer>
+        ) : undefined
       }
       header={
         showHeader ? (

@@ -8,9 +8,12 @@ import {
   TextInput,
   Popover,
   Progress,
+  NativeSelect,
 } from "@mantine/core";
 import { IconCheck, IconX, IconAt } from "@tabler/icons";
 import { useForm } from "@mantine/form";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 type FormInput = {
   firstName: string;
@@ -18,6 +21,7 @@ type FormInput = {
   email: string;
   password: string;
 };
+
 const PasswordRequirement = ({
   meets,
   label,
@@ -61,19 +65,8 @@ const requirements = [
 ];
 
 const SignUp = () => {
-  const form = useForm<FormInput>({
-    initialValues: { firstName: "", lastName: "", email: "", password: "" },
-    // add validation for email here
-  });
   const [popoverOpened, setPopoverOpened] = useState(false);
-  const [password, setPassword] = useState("");
-  const checks = requirements.map((requirement, index) => (
-    <PasswordRequirement
-      key={index}
-      label={requirement.label}
-      meets={requirement.re.test(password)}
-    />
-  ));
+  const navigate = useNavigate();
 
   const getPassStrength = (password: string) => {
     let multiplier = password.length > 5 ? 0 : 1;
@@ -87,13 +80,48 @@ const SignUp = () => {
     return Math.max(100 - (100 / (requirements.length + 1)) * multiplier, 10);
   };
 
-  const strength = getPassStrength(password);
+  const form = useForm<FormInput>({
+    initialValues: { firstName: "", lastName: "", email: "", password: "" },
+    // add validation for email here
+    validate: {
+      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
+      password: (value) =>
+        getPassStrength(value) === 100 ? null : "Invalid Password",
+    },
+  });
+
+  const checks = requirements.map((requirement, index) => (
+    <PasswordRequirement
+      key={index}
+      label={requirement.label}
+      meets={requirement.re.test(form.values.password)}
+    />
+  ));
+
+  const strength = getPassStrength(form.values.password);
   const color = strength === 100 ? "teal" : strength > 50 ? "yellow" : "red";
+
+  const register = async (formValues: FormInput) => {
+    console.log(formValues);
+    try {
+      const res = await axios.post(
+        "http://localhost:3001/auth/register",
+        formValues
+      );
+      if (res.status === 201) {
+        navigate("/login");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  console.log(strength);
 
   return (
     <Center>
       <div style={styles.formWrapper}>
-        <form onSubmit={form.onSubmit((values) => console.log(values))}>
+        <form onSubmit={form.onSubmit((values) => register(values))}>
           <TextInput
             required
             label="First Name"
@@ -128,8 +156,6 @@ const SignUp = () => {
                   required
                   label="Your password"
                   placeholder="Your password"
-                  value={password}
-                  onChange={(event) => setPassword(event.currentTarget.value)}
                   {...form.getInputProps("password")}
                 />
               </div>
@@ -143,7 +169,7 @@ const SignUp = () => {
               />
               <PasswordRequirement
                 label="Includes at least 6 characters"
-                meets={password.length > 5}
+                meets={form.values.password.length > 5}
               />
               {checks}
             </Popover.Dropdown>

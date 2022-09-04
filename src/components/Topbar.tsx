@@ -1,13 +1,23 @@
 import React from "react";
-import { Burger, Header, MediaQuery, ThemeIcon, Title, useMantineTheme } from "@mantine/core";
+import {
+  Burger,
+  Header,
+  MediaQuery,
+  ThemeIcon,
+  Title,
+  useMantineTheme,
+} from "@mantine/core";
 import { IconTallymarks } from "@tabler/icons";
+import ChokuDots from "../choku_dots.svg";
+// import ChokuDots from "../ChokuDots";
 
 type TopbarProps = {
-    opened: boolean;
-    setOpened: (value: boolean | ((prev: boolean) => boolean)) => void;
+  opened: boolean;
+  setOpened: (value: boolean | ((prev: boolean) => boolean)) => void;
 };
 
-const Topbar = ({opened, setOpened}: TopbarProps) => {
+const Topbar = ({ opened, setOpened }: TopbarProps) => {
+  console.log(opened);
   const theme = useMantineTheme();
   return (
     <Header height={70} p="md">
@@ -22,7 +32,7 @@ const Topbar = ({opened, setOpened}: TopbarProps) => {
           />
         </MediaQuery>
 
-        <ThemeIcon
+        {/* <ThemeIcon
           mr={10}
           size="xl"
           variant="gradient"
@@ -30,7 +40,10 @@ const Topbar = ({opened, setOpened}: TopbarProps) => {
         >
           <IconTallymarks />
         </ThemeIcon>
-        <Title order={3}>Choku</Title>
+        <Title order={3}>Choku</Title> */}
+        {/* <ChokuDots width="30" height="30" /> */}
+        <img src={ChokuDots} width={100} alt="website logo" />
+        {/* <ChokuDots width="288" height="288" /> */}
       </div>
     </Header>
   );

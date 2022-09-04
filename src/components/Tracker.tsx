@@ -125,51 +125,55 @@ const Tracker = () => {
           return (
             <Accordion.Item
               key={chapter_id}
-              label={name}
+              value={name}
+              // label={name}
               onClick={() => getSubtopics(chapter_id)}
             >
-              <Table>
-                <tbody>
-                  {subTopics
-                    .filter((topic) => topic.chapter_id === chapter_id)
-                    .map(({ Name, subchapter_id }, index) => {
-                      return (
-                        <tr key={subchapter_id}>
-                          <td>{Name}</td>
-                          <td>
-                            <div
-                              onClick={() =>
-                                updateProgress(subchapter_id, true)
-                              }
-                            >
-                              {subTopics.find(
-                                (ele) => ele.subchapter_id === subchapter_id
-                              ).checked === undefined ||
-                              subTopics.find(
-                                (ele) => ele.subchapter_id === subchapter_id
-                              ).checked === false ? (
-                                <IconCircleDashed />
-                              ) : (
-                                <IconCircleCheck color="green" />
-                              )}
-                            </div>
-                          </td>
-                          <td>
-                            <NumberInput
-                              // label="Passes"
-                              placeholder="Number of passes"
-                              min={1}
-                              icon={<IconBook size={18} />}
-                              onChange={(value) =>
-                                updateProgress(subchapter_id, false, value)
-                              }
-                            />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </Table>
+              <Accordion.Control>{name}</Accordion.Control>
+              <Accordion.Panel>
+                <Table>
+                  <tbody>
+                    {subTopics
+                      .filter((topic) => topic.chapter_id === chapter_id)
+                      .map(({ Name, subchapter_id }, index) => {
+                        return (
+                          <tr key={subchapter_id}>
+                            <td>{Name}</td>
+                            <td>
+                              <div
+                                onClick={() =>
+                                  updateProgress(subchapter_id, true)
+                                }
+                              >
+                                {subTopics.find(
+                                  (ele) => ele.subchapter_id === subchapter_id
+                                ).checked === undefined ||
+                                subTopics.find(
+                                  (ele) => ele.subchapter_id === subchapter_id
+                                ).checked === false ? (
+                                  <IconCircleDashed />
+                                ) : (
+                                  <IconCircleCheck color="green" />
+                                )}
+                              </div>
+                            </td>
+                            <td>
+                              <NumberInput
+                                // label="Passes"
+                                placeholder="Number of passes"
+                                min={1}
+                                icon={<IconBook size={18} />}
+                                onChange={(value) =>
+                                  updateProgress(subchapter_id, false, value)
+                                }
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </Table>
+              </Accordion.Panel>
             </Accordion.Item>
           );
         })}
