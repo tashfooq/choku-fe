@@ -1,18 +1,5 @@
 import React, { useState } from "react";
-import {
-  AppShell,
-  Navbar,
-  Header,
-  Footer,
-  ThemeIcon,
-  Text,
-  Title,
-  MediaQuery,
-  Burger,
-  useMantineTheme,
-} from "@mantine/core";
-import { Link } from "react-router-dom";
-import { IconHome, IconTrack, IconTallymarks } from "@tabler/icons";
+import { AppShell, Footer, useMantineTheme, Center } from "@mantine/core";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 
@@ -43,19 +30,26 @@ const Shell = ({
       }}
       navbarOffsetBreakpoint="sm"
       fixed
-      //the nav items can be a dumb component that takes link, label and icon as props
-      // navbar={showNavbar ? <Sidebar opened={opened} /> : undefined}
       navbar={showNavbar ? <Sidebar opened={opened} /> : undefined}
-      footer={
-        showFooter ? (
-          <Footer height={60} p="md">
-            Application footer
-          </Footer>
-        ) : undefined
-      }
       header={
         showHeader ? (
           <Topbar opened={opened} setOpened={setOpened} />
+        ) : undefined
+      }
+      footer={
+        showFooter ? (
+          <Footer height={60} p="md">
+            <Center>
+              <a href="https://ko-fi.com/F1F8DOB6D" target="_blank">
+                <img
+                  height="36"
+                  style={{ border: "0px", height: "36px" }}
+                  src="https://cdn.ko-fi.com/cdn/kofi2.png?v=3"
+                  alt="Buy Me a Coffee at ko-fi.com"
+                />
+              </a>
+            </Center>
+          </Footer>
         ) : undefined
       }
     >

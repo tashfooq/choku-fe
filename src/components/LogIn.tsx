@@ -1,5 +1,6 @@
-import { Button, Center, PasswordInput, TextInput } from "@mantine/core";
 import React from "react";
+import { Button, Center, PasswordInput, TextInput } from "@mantine/core";
+import { useForm } from "@mantine/form";
 
 const styles = {
   formWrapper: {
@@ -13,15 +14,34 @@ const styles = {
   },
 };
 
+type LoginInput = {
+  email: string;
+  password: string;
+};
+
 const LogIn = () => {
+  const login = (val: LoginInput) => {
+    console.log(val);
+  };
+
+  const form = useForm<LoginInput>({
+    initialValues: { email: "", password: "" },
+  });
+
   return (
     <Center>
       <div style={styles.formWrapper}>
-        <TextInput label="Email" required />
-        <PasswordInput label="Password" required />
-        <div style={styles.buttonStyle}>
-          <Button>Log In</Button>
-        </div>
+        <form onSubmit={form.onSubmit((values) => login(values))}>
+          <TextInput label="Email" required {...form.getInputProps("email")} />
+          <PasswordInput
+            label="Password"
+            required
+            {...form.getInputProps("password")}
+          />
+          <div style={styles.buttonStyle}>
+            <Button type="submit">Log In</Button>
+          </div>
+        </form>
       </div>
     </Center>
   );

@@ -102,7 +102,6 @@ const SignUp = () => {
   const color = strength === 100 ? "teal" : strength > 50 ? "yellow" : "red";
 
   const register = async (formValues: FormInput) => {
-    console.log(formValues);
     try {
       const res = await axios.post(
         "http://localhost:3001/auth/register",
@@ -115,8 +114,6 @@ const SignUp = () => {
       console.log(err);
     }
   };
-
-  console.log(strength);
 
   return (
     <Center>
