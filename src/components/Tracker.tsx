@@ -8,7 +8,14 @@ import {
   Table,
   NumberInput,
 } from "@mantine/core";
-import { CircleDashed, CircleCheck, Book, DeviceFloppy, Settings } from "tabler-icons-react";
+import {
+  IconCircleDashed,
+  IconCircleCheck,
+  IconBook,
+  IconDeviceFloppy,
+  IconSettings,
+} from "@tabler/icons";
+import TrackerSettings from "./TrackerSettings";
 
 const Tracker = () => {
   const [textbooks, setTextbooks] = useState([]);
@@ -17,16 +24,26 @@ const Tracker = () => {
     ""
   ); //these needs to be renamed to something more appropriate
   const [subTopics, setSubTopics] = useState<any[]>([]); //figure out a more appropriate type for this and avoid using any
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
   const getTextbooks = async () => {
-    const response = await fetch("http://localhost:3001/course/textbooks");
+    const response = await fetch("http://localhost:3001/course/textbooks", {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("accessToken"),
+      },
+    });
     const { textbooks } = await response.json();
     setTextbooks(textbooks);
   };
 
   const getChapters = async (textbookId: number) => {
     const response = await fetch(
-      `http://localhost:3001/course/textbooks/${textbookId}/chapters`
+      `http://localhost:3001/course/textbooks/${textbookId}/chapters`,
+      {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("accessToken"),
+        },
+      }
     );
     const { chapters } = await response.json();
     setChapters(chapters);
@@ -34,7 +51,12 @@ const Tracker = () => {
 
   const getSubtopics = async (chapterId: number) => {
     const response = await fetch(
-      `http://localhost:3001/course/subtopic/${chapterId}`
+      `http://localhost:3001/course/subtopic/${chapterId}`,
+      {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("accessToken"),
+        },
+      }
     );
     const { subtopics } = await response.json();
     if (
@@ -97,8 +119,19 @@ const Tracker = () => {
           })}
         />
         <div>
-          <Button leftIcon={<Settings size={18} />} style={{marginRight: 10}}>Change tracker settings</Button>
-          <Button leftIcon={<DeviceFloppy size={18} />} onClick={() => console.log(chapters)}>Save</Button>
+          <Button
+            leftIcon={<IconSettings size={18} />}
+            style={{ marginRight: 10 }}
+            onClick={() => setSettingsModalOpen(true)}
+          >
+            Change tracker settings
+          </Button>
+          <Button
+            leftIcon={<IconDeviceFloppy size={18} />}
+            onClick={() => console.log(chapters)}
+          >
+            Save
+          </Button>
         </div>
       </Group>
       <Accordion>
@@ -106,55 +139,63 @@ const Tracker = () => {
           return (
             <Accordion.Item
               key={chapter_id}
-              label={name}
+              value={name}
+              // label={name}
               onClick={() => getSubtopics(chapter_id)}
             >
-              <Table>
-                <tbody>
-                  {subTopics
-                    .filter((topic) => topic.chapter_id === chapter_id)
-                    .map(({ Name, subchapter_id }, index) => {
-                      return (
-                        <tr key={subchapter_id}>
-                          <td>{Name}</td>
-                          <td>
-                            <div
-                              onClick={() =>
-                                updateProgress(subchapter_id, true)
-                              }
-                            >
-                              {subTopics.find(
-                                (ele) => ele.subchapter_id === subchapter_id
-                              ).checked === undefined ||
-                              subTopics.find(
-                                (ele) => ele.subchapter_id === subchapter_id
-                              ).checked === false ? (
-                                <CircleDashed />
-                              ) : (
-                                <CircleCheck color="green" />
-                              )}
-                            </div>
-                          </td>
-                          <td>
-                            <NumberInput
-                              // label="Passes"
-                              placeholder="Number of passes"
-                              min={0}
-                              icon={<Book size={18} />}
-                              onChange={(value) =>
-                                updateProgress(subchapter_id, false, value)
-                              }
-                            />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </Table>
+              <Accordion.Control>{name}</Accordion.Control>
+              <Accordion.Panel>
+                <Table>
+                  <tbody>
+                    {subTopics
+                      .filter((topic) => topic.chapter_id === chapter_id)
+                      .map(({ Name, subchapter_id }, index) => {
+                        return (
+                          <tr key={subchapter_id}>
+                            <td>{Name}</td>
+                            <td>
+                              <div
+                                onClick={() =>
+                                  updateProgress(subchapter_id, true)
+                                }
+                              >
+                                {subTopics.find(
+                                  (ele) => ele.subchapter_id === subchapter_id
+                                ).checked === undefined ||
+                                subTopics.find(
+                                  (ele) => ele.subchapter_id === subchapter_id
+                                ).checked === false ? (
+                                  <IconCircleDashed />
+                                ) : (
+                                  <IconCircleCheck color="green" />
+                                )}
+                              </div>
+                            </td>
+                            <td>
+                              <NumberInput
+                                // label="Passes"
+                                placeholder="Number of passes"
+                                min={1}
+                                icon={<IconBook size={18} />}
+                                onChange={(value) =>
+                                  updateProgress(subchapter_id, false, value)
+                                }
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </Table>
+              </Accordion.Panel>
             </Accordion.Item>
           );
         })}
       </Accordion>
+      <TrackerSettings
+        isOpen={settingsModalOpen}
+        closer={setSettingsModalOpen}
+      />
     </Container>
   );
 };
