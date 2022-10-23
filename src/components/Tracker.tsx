@@ -27,14 +27,23 @@ const Tracker = () => {
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
   const getTextbooks = async () => {
-    const response = await fetch("http://localhost:3001/course/textbooks");
+    const response = await fetch("http://localhost:3001/course/textbooks", {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("accessToken"),
+      },
+    });
     const { textbooks } = await response.json();
     setTextbooks(textbooks);
   };
 
   const getChapters = async (textbookId: number) => {
     const response = await fetch(
-      `http://localhost:3001/course/textbooks/${textbookId}/chapters`
+      `http://localhost:3001/course/textbooks/${textbookId}/chapters`,
+      {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("accessToken"),
+        },
+      }
     );
     const { chapters } = await response.json();
     setChapters(chapters);
@@ -42,7 +51,12 @@ const Tracker = () => {
 
   const getSubtopics = async (chapterId: number) => {
     const response = await fetch(
-      `http://localhost:3001/course/subtopic/${chapterId}`
+      `http://localhost:3001/course/subtopic/${chapterId}`,
+      {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("accessToken"),
+        },
+      }
     );
     const { subtopics } = await response.json();
     if (

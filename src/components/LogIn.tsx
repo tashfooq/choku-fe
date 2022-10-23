@@ -2,6 +2,7 @@ import React from "react";
 import { Button, Center, PasswordInput, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const styles = {
   formWrapper: {
@@ -36,8 +37,10 @@ const LogIn = () => {
         "http://localhost:3001/auth/login",
         loginValues
       );
-      if (res.status === 201) {
-        navigate("/login");
+      console.log(res);
+      if (res.status === 200) {
+        localStorage.setItem("accessToken", res.data.accessToken);
+        navigate("/tracker");
       }
     } catch (err) {
       console.log(err);
@@ -45,7 +48,7 @@ const LogIn = () => {
   };
 
   return (
-    <Center>
+    <Center data-test-element="testing-double-quotes">
       <div style={styles.formWrapper}>
         <form onSubmit={form.onSubmit((values) => login(values))}>
           <TextInput label="Email" required {...form.getInputProps("email")} />
