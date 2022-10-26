@@ -16,6 +16,8 @@ import {
   IconSettings,
 } from "@tabler/icons";
 import TrackerSettings from "./TrackerSettings";
+import axios from "axios";
+import { contentService } from "../services/ContentService";
 
 const Tracker = () => {
   const [textbooks, setTextbooks] = useState([]);
@@ -27,44 +29,43 @@ const Tracker = () => {
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
   const getTextbooks = async () => {
-    const response = await fetch("http://localhost:3001/course/textbooks", {
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("accessToken"),
-      },
-    });
-    const { textbooks } = await response.json();
+    // probably should destructure this as well
+    const textbooks = await contentService.getTextbooksService();
     setTextbooks(textbooks);
   };
 
+  // rename to something like filtered chapters
   const getChapters = async (textbookId: number) => {
-    const response = await fetch(
-      `http://localhost:3001/course/textbooks/${textbookId}/chapters`,
-      {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("accessToken"),
-        },
-      }
-    );
-    const { chapters } = await response.json();
+    const chapters = await contentService.getChapters(textbookId);
     setChapters(chapters);
   };
 
   const getSubtopics = async (chapterId: number) => {
-    const response = await fetch(
-      `http://localhost:3001/course/subtopic/${chapterId}`,
-      {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("accessToken"),
-        },
-      }
-    );
-    const { subtopics } = await response.json();
+    const subtopics = await contentService.getSubtopics(chapterId);
     if (
       subTopics.filter((topic) => topic.chapter_id === chapterId).length !== 0
     ) {
       return;
     }
     setSubTopics((prev) => [...prev, ...subtopics]);
+  };
+
+  const getUser = async () => {
+    const { data } = await axios.get("http://localhost:3001/auth/user", {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("accessToken"),
+      },
+    });
+    return data;
+  };
+
+  const saveProgress = async () => {
+    const { id } = await getUser();
+    // console.log(id);
+    const filteredProgress = subTopics.filter(
+      (topic) => topic.checked === true
+    );
+    console.log(filteredProgress);
   };
 
   const updateProgress = (
@@ -128,7 +129,7 @@ const Tracker = () => {
           </Button>
           <Button
             leftIcon={<IconDeviceFloppy size={18} />}
-            onClick={() => console.log(chapters)}
+            onClick={saveProgress}
           >
             Save
           </Button>
