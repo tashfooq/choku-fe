@@ -18,6 +18,7 @@ import {
 import TrackerSettings from "./TrackerSettings";
 import axios from "axios";
 import { contentService } from "../services/ContentService";
+import { authService } from "../services/AuthService";
 
 const Tracker = () => {
   const [textbooks, setTextbooks] = useState([]);
@@ -50,17 +51,8 @@ const Tracker = () => {
     setSubTopics((prev) => [...prev, ...subtopics]);
   };
 
-  const getUser = async () => {
-    const { data } = await axios.get("http://localhost:3001/auth/user", {
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("accessToken"),
-      },
-    });
-    return data;
-  };
-
   const saveProgress = async () => {
-    const { id } = await getUser();
+    const { id } = await authService.getUser();
     // console.log(id);
     const filteredProgress = subTopics.filter(
       (topic) => topic.checked === true
