@@ -23,7 +23,7 @@ const getChapters = async (textbookId: number) => {
   return response.data.chapters || [];
 };
 
-const getSubtopics = async (chapterId: number) => {
+const getSubChapters = async (chapterId: number) => {
   const response = await axios.get(
     `http://localhost:3001/course/subtopic/${chapterId}`,
     {
@@ -33,12 +33,11 @@ const getSubtopics = async (chapterId: number) => {
     }
   );
   // should see what happens to this destructuring the response.data does not exist
-  const { subtopics } = response.data || [];
-  return subtopics;
+  return response.data.subtopics || [];
 };
 
 export const contentService = {
   getTextbooksService,
   getChapters,
-  getSubtopics,
+  getSubChapters,
 };
