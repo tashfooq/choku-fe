@@ -13,7 +13,7 @@ import {
   IconCircleCheck,
   IconBook,
   IconDeviceFloppy,
-  IconSettings,
+  IconBook2,
 } from "@tabler/icons";
 import TrackerSettings from "./TrackerSettings";
 import { contentService } from "../services/ContentService";
@@ -24,6 +24,7 @@ type SubChapter = {
   name: string;
   chapter_id: number;
   checked?: boolean;
+  passes?: number;
 };
 
 const Tracker = () => {
@@ -57,11 +58,18 @@ const Tracker = () => {
 
   const saveProgress = async () => {
     const { id } = await authService.getUser();
-    console.log(id);
-    const filteredProgress = subChapters.filter(
-      (topic) => topic.checked === true
-    );
-    console.log(filteredProgress);
+    const reduced = subChapters.reduce((prev, curr) => {
+      const prog = {
+        id: curr.id,
+        ...(curr.passes && { passes: curr.passes }),
+      };
+      curr.checked === true && prev.push(prog);
+      return prev;
+    }, []);
+    console.log(reduced);
+    const progject = { userId: id, subChapterProgress: reduced };
+    console.log(progject);
+    // console.log(filteredProgress);
   };
 
   const checkOrPasses = (subChapterId: number, passes?: number) => {
@@ -110,11 +118,11 @@ const Tracker = () => {
         />
         <div>
           <Button
-            leftIcon={<IconSettings size={18} />}
+            leftIcon={<IconBook2 size={18} />}
             style={{ marginRight: 10 }}
             onClick={() => setSettingsModalOpen(true)}
           >
-            Change tracker settings
+            Update Tracker Material
           </Button>
           <Button
             leftIcon={<IconDeviceFloppy size={18} />}
