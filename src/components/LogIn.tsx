@@ -3,6 +3,7 @@ import { Button, Center, PasswordInput, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { authService } from "../services/AuthService";
 
 const styles = {
   formWrapper: {
@@ -16,41 +17,28 @@ const styles = {
   },
 };
 
-type LoginInput = {
+export type LoginInput = {
   email: string;
   password: string;
 };
 
 const LogIn = () => {
-  // const login = (val: LoginInput) => {
-  //   console.log(val);
-  // };
   const navigate = useNavigate();
 
   const form = useForm<LoginInput>({
     initialValues: { email: "", password: "" },
   });
 
-  const login = async (loginValues: LoginInput) => {
-    try {
-      const res = await axios.post(
-        "http://localhost:3001/auth/login",
-        loginValues
-      );
-      console.log(res);
-      if (res.status === 200) {
-        localStorage.setItem("accessToken", res.data.accessToken);
-        navigate("/tracker");
-      }
-    } catch (err) {
-      console.log(err);
-    }
+  const submitLogin = async (loginValues: LoginInput) => {
+    const user = await authService.login(loginValues);
+    localStorage.setItem("accessToken", user?.accessToken);
+    navigate("/tracker");
   };
 
   return (
     <Center data-test-element="testing-double-quotes">
       <div style={styles.formWrapper}>
-        <form onSubmit={form.onSubmit((values) => login(values))}>
+        <form onSubmit={form.onSubmit((values) => submitLogin(values))}>
           <TextInput label="Email" required {...form.getInputProps("email")} />
           <PasswordInput
             label="Password"

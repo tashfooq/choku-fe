@@ -13,9 +13,19 @@ import {
   IconCircleCheck,
   IconBook,
   IconDeviceFloppy,
-  IconSettings,
+  IconBook2,
 } from "@tabler/icons";
 import TrackerSettings from "./TrackerSettings";
+import { contentService } from "../services/ContentService";
+import { authService } from "../services/AuthService";
+
+type SubChapter = {
+  id: number;
+  name: string;
+  chapter_id: number;
+  checked?: boolean;
+  passes?: number;
+};
 
 const Tracker = () => {
   const [textbooks, setTextbooks] = useState([]);
@@ -23,79 +33,67 @@ const Tracker = () => {
   const [textbookSelectValue, setTextbookSelectValue] = useState<string | null>(
     ""
   ); //these needs to be renamed to something more appropriate
-  const [subTopics, setSubTopics] = useState<any[]>([]); //figure out a more appropriate type for this and avoid using any
+  const [subChapters, setSubChapters] = useState<any[]>([]); //figure out a more appropriate type for this and avoid using any
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
   const getTextbooks = async () => {
-    const response = await fetch("http://localhost:3001/course/textbooks", {
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("accessToken"),
-      },
-    });
-    const { textbooks } = await response.json();
+    const textbooks = await contentService.getTextbooksService();
     setTextbooks(textbooks);
   };
 
   const getChapters = async (textbookId: number) => {
-    const response = await fetch(
-      `http://localhost:3001/course/textbooks/${textbookId}/chapters`,
-      {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("accessToken"),
-        },
-      }
-    );
-    const { chapters } = await response.json();
+    const chapters = await contentService.getChapters(textbookId);
     setChapters(chapters);
   };
 
-  const getSubtopics = async (chapterId: number) => {
-    const response = await fetch(
-      `http://localhost:3001/course/subtopic/${chapterId}`,
-      {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("accessToken"),
-        },
-      }
-    );
-    const { subtopics } = await response.json();
+  const getSubChaptersByChapterId = async (chapterId: number) => {
+    const subChaps = await contentService.getSubChapters(chapterId);
     if (
-      subTopics.filter((topic) => topic.chapter_id === chapterId).length !== 0
+      subChapters.filter((sC: any) => sC.chapter_id === chapterId).length !== 0
     ) {
       return;
     }
-    setSubTopics((prev) => [...prev, ...subtopics]);
+    setSubChapters((prev: any) => [...prev, ...subChaps]);
   };
 
-  const updateProgress = (
-    subchapterId: number,
-    markComplete: boolean,
-    passes?: number
-  ) => {
-    const toMutate = subTopics.find(
-      (topic) => topic.subchapter_id === subchapterId
-    );
-    const toMutateIdx = subTopics.findIndex(
-      (topic) => topic.subchapter_id === subchapterId
-    );
-    const copy = [...subTopics];
-    if (markComplete === true) {
-      if (toMutate.checked === undefined || toMutate.checked === false) {
-        const mutated = { ...toMutate, checked: true };
-        copy[toMutateIdx] = mutated;
-        setSubTopics(copy);
-      } else {
-        const mutated = { ...toMutate, checked: false };
-        copy[toMutateIdx] = mutated;
-        setSubTopics(copy);
-      }
-    } else {
-      const mutated = { ...toMutate, passes };
-      copy[toMutateIdx] = mutated;
-      setSubTopics(copy);
+  const saveProgress = async () => {
+    const { id } = await authService.getUser();
+    const reduced = subChapters.reduce((prev, curr) => {
+      const prog = {
+        id: curr.id,
+        ...(curr.passes && { passes: curr.passes }),
+      };
+      curr.checked === true && prev.push(prog);
+      return prev;
+    }, []);
+    console.log(reduced);
+    const progject = { userId: id, subChapterProgress: reduced };
+    console.log(progject);
+    // console.log(filteredProgress);
+  };
+
+  const checkOrPasses = (subChapterId: number, passes?: number) => {
+    const subChap = subChapters.find((sC) => sC.id === subChapterId);
+    const subChapIdx = subChapters.findIndex((sC) => sC.id === subChapterId);
+    const deepFake: SubChapter[] = [...subChapters];
+    if (passes) {
+      deepFake[subChapIdx] = { ...subChap, passes };
+      setSubChapters(deepFake);
+      return;
     }
+    if (Object.keys(subChap).includes("checked")) {
+      deepFake[subChapIdx] =
+        subChap?.checked === true
+          ? { ...subChap, checked: false }
+          : { ...subChap, checked: true };
+      setSubChapters(deepFake);
+      return;
+    }
+    deepFake[subChapIdx] = { ...subChap, checked: true };
+    setSubChapters(deepFake);
   };
 
+  // this needs to turn into fetch previosly selected textbooks (a part of progress)
   useEffect(() => {
     getTextbooks();
   }, []);
@@ -120,15 +118,15 @@ const Tracker = () => {
         />
         <div>
           <Button
-            leftIcon={<IconSettings size={18} />}
+            leftIcon={<IconBook2 size={18} />}
             style={{ marginRight: 10 }}
             onClick={() => setSettingsModalOpen(true)}
           >
-            Change tracker settings
+            Update Tracker Material
           </Button>
           <Button
             leftIcon={<IconDeviceFloppy size={18} />}
-            onClick={() => console.log(chapters)}
+            onClick={saveProgress}
           >
             Save
           </Button>
@@ -141,44 +139,35 @@ const Tracker = () => {
               key={chapter_id}
               value={name}
               // label={name}
-              onClick={() => getSubtopics(chapter_id)}
+              onClick={() => getSubChaptersByChapterId(chapter_id)}
             >
               <Accordion.Control>{name}</Accordion.Control>
               <Accordion.Panel>
                 <Table>
                   <tbody>
-                    {subTopics
-                      .filter((topic) => topic.chapter_id === chapter_id)
-                      .map(({ Name, subchapter_id }, index) => {
+                    {subChapters
+                      .filter((sC) => sC.chapter_id === chapter_id)
+                      .map(({ name, id }) => {
                         return (
-                          <tr key={subchapter_id}>
-                            <td>{Name}</td>
+                          <tr key={id}>
+                            <td>{name}</td>
                             <td>
-                              <div
-                                onClick={() =>
-                                  updateProgress(subchapter_id, true)
-                                }
-                              >
-                                {subTopics.find(
-                                  (ele) => ele.subchapter_id === subchapter_id
-                                ).checked === undefined ||
-                                subTopics.find(
-                                  (ele) => ele.subchapter_id === subchapter_id
-                                ).checked === false ? (
-                                  <IconCircleDashed />
-                                ) : (
+                              <div onClick={() => checkOrPasses(id)}>
+                                {subChapters.find((sC) => sC.id === id)
+                                  ?.checked ? (
                                   <IconCircleCheck color="green" />
+                                ) : (
+                                  <IconCircleDashed />
                                 )}
                               </div>
                             </td>
                             <td>
                               <NumberInput
-                                // label="Passes"
                                 placeholder="Number of passes"
                                 min={1}
                                 icon={<IconBook size={18} />}
-                                onChange={(value) =>
-                                  updateProgress(subchapter_id, false, value)
+                                onChange={(passNumber) =>
+                                  checkOrPasses(id, passNumber)
                                 }
                               />
                             </td>
