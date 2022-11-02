@@ -14,8 +14,9 @@ import { IconCheck, IconX, IconAt } from "@tabler/icons";
 import { useForm } from "@mantine/form";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { authService } from "../services/AuthService";
 
-type FormInput = {
+export type SignUpInput = {
   firstName: string;
   lastName: string;
   email: string;
@@ -80,7 +81,7 @@ const SignUp = () => {
     return Math.max(100 - (100 / (requirements.length + 1)) * multiplier, 10);
   };
 
-  const form = useForm<FormInput>({
+  const form = useForm<SignUpInput>({
     initialValues: { firstName: "", lastName: "", email: "", password: "" },
     // add validation for email here
     validate: {
@@ -101,17 +102,10 @@ const SignUp = () => {
   const strength = getPassStrength(form.values.password);
   const color = strength === 100 ? "teal" : strength > 50 ? "yellow" : "red";
 
-  const register = async (formValues: FormInput) => {
-    try {
-      const res = await axios.post(
-        "http://localhost:3001/auth/register",
-        formValues
-      );
-      if (res.status === 201) {
-        navigate("/login");
-      }
-    } catch (err) {
-      console.log(err);
+  const register = async (formValues: SignUpInput) => {
+    const test = await authService.register(formValues);
+    if (test?.status === 201) {
+      navigate("/login");
     }
   };
 
