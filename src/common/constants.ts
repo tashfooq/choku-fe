@@ -5,10 +5,10 @@ export const themeColors = {
   jet: "#302B27",
 };
 
-const baseUrl = process.env.BACKEND_URL;
+export const baseUrl = process.env.REACT_APP_BACKEND_URL;
 
 export const apiRoutes = {
   auth: `${baseUrl}/auth`,
   content: `${baseUrl}/content`,
-  progress: `${baseUrl}/auth`,
+  progress: `${baseUrl}/progress`,
 };

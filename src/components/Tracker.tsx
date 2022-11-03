@@ -15,7 +15,7 @@ import {
   IconDeviceFloppy,
   IconBook2,
 } from "@tabler/icons";
-import TrackerSettings from "./TrackerSettings";
+import MaterialPicker from "./MaterialPicker";
 import { contentService } from "../services/ContentService";
 import { authService } from "../services/AuthService";
 
@@ -181,7 +181,8 @@ const Tracker = () => {
           );
         })}
       </Accordion>
-      <TrackerSettings
+      <MaterialPicker
+        isModalView={true}
         isOpen={settingsModalOpen}
         closer={setSettingsModalOpen}
       />

@@ -5,6 +5,7 @@ import LogIn from "./components/LogIn";
 import Tracker from "./components/Tracker";
 import Shell from "./components/Shell";
 import { useEffect } from "react";
+import { ProgressProvider } from "./context/ProgressContext";
 
 function App() {
   useEffect(() => {
@@ -22,16 +23,21 @@ function App() {
           />
           <Route
             path="login"
+            element={<Shell showNavbar={false} content={<LogIn />} />}
+          />
+          {/* <Route path="tracker" element={<Tracker />} /> */}
+          <Route
+            path="tracker"
             element={
               <Shell
-                showNavbar={false}
-                showFooter={false}
-                content={<LogIn />}
+                content={
+                  <ProgressProvider>
+                    <Tracker />
+                  </ProgressProvider>
+                }
               />
             }
           />
-          {/* <Route path="tracker" element={<Tracker />} /> */}
-          <Route path="tracker" element={<Shell content={<Tracker />} />} />
         </Routes>
       </BrowserRouter>
     </>
