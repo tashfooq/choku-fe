@@ -3,7 +3,7 @@ import { progressService } from "../services/ProgressService";
 
 type Progress = {
   userId: number;
-  selectedMaterialsIds: number[];
+  selectedMaterialIds: number[];
   subChapterProgress: number[];
 };
 
@@ -13,6 +13,7 @@ export type ProgressContextType = {
   progress: Progress | null;
   setProgress: (progress: Progress | null) => void;
   fetchProgress: (userId: number) => Promise<void>;
+  updateProgress: (userId: number, selectedMaterialIds: number[]) => void;
 };
 
 type ProgressProviderProps = {
@@ -32,6 +33,19 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
     setProgress(prog);
   };
 
+  const updateProgress = async (
+    userId: number,
+    subChapterProgress: number[]
+  ) => {
+    const object: Progress = {
+      userId,
+      selectedMaterialIds,
+      subChapterProgress,
+    };
+    setProgress(object);
+    // needs to be a post request here
+  };
+
   return (
     <ProgressContext.Provider
       value={{
@@ -40,6 +54,7 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
         progress,
         setProgress,
         fetchProgress,
+        updateProgress,
       }}
     >
       {children}

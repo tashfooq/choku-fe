@@ -21,7 +21,7 @@ const MaterialPicker = ({
   // replacing this with setter from context
   // type issue here
   const [selected, setSelected] = useState<any[]>([]);
-  const { selectedMaterialIds, setSelectedMaterialIds } = useContext(
+  const { setSelectedMaterialIds } = useContext(
     ProgressContext
   ) as ProgressContextType;
 
@@ -35,7 +35,6 @@ const MaterialPicker = ({
 
   const saveMaterials = () => {
     setSelectedMaterialIds(selected);
-    console.log(selectedMaterialIds);
   };
 
   useEffect(() => {
