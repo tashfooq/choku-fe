@@ -6,6 +6,7 @@ import Tracker from "./components/Tracker";
 import Shell from "./components/Shell";
 import { useEffect } from "react";
 import { ProgressProvider } from "./context/ProgressContext";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   useEffect(() => {
@@ -14,31 +15,24 @@ function App() {
   return (
     <>
       <BrowserRouter>
-        <Routes>
-          <Route index element={<Shell content={<Home />} />} />
-          <Route path="home" element={<Shell content={<Home />} />} />
-          <Route
-            path="signup"
-            element={<Shell showNavbar={false} content={<SignUp />} />}
-          />
-          <Route
-            path="login"
-            element={<Shell showNavbar={false} content={<LogIn />} />}
-          />
-          {/* <Route path="tracker" element={<Tracker />} /> */}
-          <Route
-            path="tracker"
-            element={
-              <Shell
-                content={
-                  <ProgressProvider>
-                    <Tracker />
-                  </ProgressProvider>
-                }
+        <AuthProvider>
+          <ProgressProvider>
+            <Routes>
+              <Route index element={<Shell content={<Home />} />} />
+              <Route path="home" element={<Shell content={<Home />} />} />
+              <Route
+                path="signup"
+                element={<Shell showNavbar={false} content={<SignUp />} />}
               />
-            }
-          />
-        </Routes>
+              <Route
+                path="login"
+                element={<Shell showNavbar={false} content={<LogIn />} />}
+              />
+              {/* <Route path="tracker" element={<Tracker />} /> */}
+              <Route path="tracker" element={<Shell content={<Tracker />} />} />
+            </Routes>
+          </ProgressProvider>
+        </AuthProvider>
       </BrowserRouter>
     </>
   );

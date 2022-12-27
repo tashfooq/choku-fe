@@ -1,19 +1,29 @@
-import { createContext, ReactNode, useState } from "react";
+import { createContext, ReactNode, useEffect, useRef, useState } from "react";
+import { contentService } from "../services/ContentService";
 import { progressService } from "../services/ProgressService";
 
-type Progress = {
-  userId: number;
+export type Progress = {
+  id?: number;
+  passes?: number;
+};
+
+export type ProgressDto = {
   selectedMaterialIds: number[];
-  subChapterProgress: number[];
+  subChapterProgress?: Progress[];
+  subTopicProgress?: Progress[];
 };
 
 export type ProgressContextType = {
   selectedMaterialIds: number[];
   setSelectedMaterialIds: (materialIds: number[]) => void;
-  progress: Progress | null;
-  setProgress: (progress: Progress | null) => void;
-  fetchProgress: (userId: number) => Promise<void>;
-  updateProgress: (userId: number, selectedMaterialIds: number[]) => void;
+  progress: ProgressDto | null;
+  setProgress: (progress: ProgressDto | null) => void;
+  fetchProgress: () => Promise<ProgressDto>;
+  updateProgress: (
+    subChapterProgress?: Progress[],
+    subTopicProgress?: Progress[]
+  ) => Promise<ProgressDto>;
+  filteredMaterials: any[];
 };
 
 type ProgressProviderProps = {
@@ -24,27 +34,51 @@ const ProgressContext = createContext<ProgressContextType | null>(null);
 
 export const ProgressProvider = ({ children }: ProgressProviderProps) => {
   const [selectedMaterialIds, setSelectedMaterialIds] = useState<number[]>([]);
-  const [progress, setProgress] = useState<Progress | null>(null);
+  const [progress, setProgress] = useState<ProgressDto | null>(null);
+  const [filteredMaterials, setFilteredMaterials] = useState([]);
 
-  //fetchprog -> setSelectedMaterial and setProgress
-  const fetchProgress = async () => {
-    const prog = await progressService.getProgress();
-    console.log(prog);
-    setProgress(prog);
+  const filterMaterials = async () => {
+    const textbooks = await contentService.getAllTextbooks();
+    setFilteredMaterials(
+      textbooks.filter((t: any) => selectedMaterialIds.includes(t.textbook_id))
+    );
   };
 
+  const fetchProgress = async () => {
+    const response = await progressService.getProgress();
+    // need null checks around this
+    // rename to something similar in db
+    const { subchapters, textbooks, user_id } = response[0];
+    const test: ProgressDto = {
+      selectedMaterialIds: textbooks,
+      subChapterProgress: subchapters.subChapProg,
+    };
+    setSelectedMaterialIds(textbooks);
+    setProgress(test);
+    return test;
+  };
+
+  // maybe update progress should only take userId and we should update
+  // subchapter and subtopic progress in useEffect
   const updateProgress = async (
-    userId: number,
-    subChapterProgress: number[]
+    subChapterProgress?: Progress[],
+    subTopicProgress?: Progress[]
   ) => {
-    const object: Progress = {
-      userId,
+    const object: ProgressDto = {
       selectedMaterialIds,
       subChapterProgress,
+      subTopicProgress,
     };
     setProgress(object);
-    // needs to be a post request here
+    progressService.updateProgress(object);
+    return object;
   };
+
+  useEffect(() => {
+    if (selectedMaterialIds.length > 0) {
+      filterMaterials();
+    }
+  }, [selectedMaterialIds]);
 
   return (
     <ProgressContext.Provider
@@ -55,6 +89,7 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
         setProgress,
         fetchProgress,
         updateProgress,
+        filteredMaterials,
       }}
     >
       {children}

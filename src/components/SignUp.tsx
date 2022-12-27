@@ -8,11 +8,10 @@ import {
   TextInput,
   Popover,
   Progress,
-  NativeSelect,
+  Notification,
 } from "@mantine/core";
 import { IconCheck, IconX, IconAt } from "@tabler/icons";
 import { useForm } from "@mantine/form";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../services/AuthService";
 
@@ -67,6 +66,8 @@ const requirements = [
 
 const SignUp = () => {
   const [popoverOpened, setPopoverOpened] = useState(false);
+  const [showErrorNotification, setShowErrorNotification] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
 
   const getPassStrength = (password: string) => {
@@ -106,71 +107,85 @@ const SignUp = () => {
     const test = await authService.register(formValues);
     if (test?.status === 201) {
       navigate("/login");
+    } else {
+      setErrorMsg("Email already exists!");
+      setShowErrorNotification(true);
     }
   };
 
   return (
-    <Center>
-      <div style={styles.formWrapper}>
-        <form onSubmit={form.onSubmit((values) => register(values))}>
-          <TextInput
-            required
-            label="First Name"
-            style={styles.inputSpacer}
-            {...form.getInputProps("firstName")}
-          />
-          <TextInput
-            required
-            label="Last Name"
-            style={styles.inputSpacer}
-            {...form.getInputProps("lastName")}
-          />
-          <TextInput
-            required
-            label="Email"
-            style={styles.inputSpacer}
-            icon={<IconAt size={14} />}
-            {...form.getInputProps("email")}
-          />
-          <Popover
-            opened={popoverOpened}
-            position="bottom"
-            width="target"
-            transition="pop"
-          >
-            <Popover.Target>
-              <div
-                onFocusCapture={() => setPopoverOpened(true)}
-                onBlurCapture={() => setPopoverOpened(false)}
-              >
-                <PasswordInput
-                  required
-                  label="Your password"
-                  placeholder="Your password"
-                  {...form.getInputProps("password")}
+    <>
+      {showErrorNotification && (
+        <Notification
+          icon={<IconX size={18} />}
+          color="red"
+          onClose={() => setShowErrorNotification(false)}
+        >
+          {errorMsg}
+        </Notification>
+      )}
+      <Center>
+        <div style={styles.formWrapper}>
+          <form onSubmit={form.onSubmit((values) => register(values))}>
+            <TextInput
+              required
+              label="First Name"
+              style={styles.inputSpacer}
+              {...form.getInputProps("firstName")}
+            />
+            <TextInput
+              required
+              label="Last Name"
+              style={styles.inputSpacer}
+              {...form.getInputProps("lastName")}
+            />
+            <TextInput
+              required
+              label="Email"
+              style={styles.inputSpacer}
+              icon={<IconAt size={14} />}
+              {...form.getInputProps("email")}
+            />
+            <Popover
+              opened={popoverOpened}
+              position="bottom"
+              width="target"
+              transition="pop"
+            >
+              <Popover.Target>
+                <div
+                  onFocusCapture={() => setPopoverOpened(true)}
+                  onBlurCapture={() => setPopoverOpened(false)}
+                >
+                  <PasswordInput
+                    required
+                    label="Your password"
+                    placeholder="Your password"
+                    {...form.getInputProps("password")}
+                  />
+                </div>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <Progress
+                  color={color}
+                  value={strength}
+                  size={5}
+                  style={{ marginBottom: 10 }}
                 />
-              </div>
-            </Popover.Target>
-            <Popover.Dropdown>
-              <Progress
-                color={color}
-                value={strength}
-                size={5}
-                style={{ marginBottom: 10 }}
-              />
-              <PasswordRequirement
-                label="Includes at least 6 characters"
-                meets={form.values.password.length > 5}
-              />
-              {checks}
-            </Popover.Dropdown>
-          </Popover>
-          <div style={styles.buttonStyle}>
-            <Button type="submit">Sign Up</Button>
-          </div>
-        </form>
-      </div>
-    </Center>
+                <PasswordRequirement
+                  label="Includes at least 6 characters"
+                  meets={form.values.password.length > 5}
+                />
+                {checks}
+              </Popover.Dropdown>
+            </Popover>
+            <div style={styles.buttonStyle}>
+              <Button type="submit">Sign Up</Button>
+            </div>
+          </form>
+        </div>
+      </Center>
+    </>
   );
 };
 

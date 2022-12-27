@@ -1,21 +1,20 @@
-import React from "react";
-import { Button, Center, PasswordInput, TextInput } from "@mantine/core";
+import React, { useContext } from "react";
+import {
+  TextInput,
+  PasswordInput,
+  Checkbox,
+  Anchor,
+  Paper,
+  Title,
+  Text,
+  Container,
+  Group,
+  Button,
+} from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { authService } from "../services/AuthService";
-
-const styles = {
-  formWrapper: {
-    height: 400,
-    width: 400,
-  },
-  buttonStyle: {
-    display: "flex",
-    justifyContent: "flex-end",
-    marginTop: 10,
-  },
-};
+import AuthContext, { AuthContextType } from "../context/AuthContext";
 
 export type LoginInput = {
   email: string;
@@ -23,6 +22,7 @@ export type LoginInput = {
 };
 
 const LogIn = () => {
+  const { isLoggedIn } = useContext(AuthContext) as AuthContextType;
   const navigate = useNavigate();
 
   const form = useForm<LoginInput>({
@@ -36,21 +36,58 @@ const LogIn = () => {
   };
 
   return (
-    <Center data-test-element="testing-double-quotes">
-      <div style={styles.formWrapper}>
+    <Container size={420} my={40}>
+      <Title
+        align="center"
+        sx={(theme) => ({
+          fontFamily: `Greycliff CF, ${theme.fontFamily}`,
+          fontWeight: 900,
+        })}
+      >
+        Welcome back!
+      </Title>
+      <Text color="dimmed" size="sm" align="center" mt={5}>
+        Do not have an account yet?{" "}
+        <Anchor<"a">
+          href="#"
+          size="sm"
+          onClick={(event) => event.preventDefault()}
+        >
+          Create account
+        </Anchor>
+      </Text>
+
+      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
         <form onSubmit={form.onSubmit((values) => submitLogin(values))}>
-          <TextInput label="Email" required {...form.getInputProps("email")} />
+          <TextInput
+            label="Email"
+            placeholder="you@mantine.dev"
+            required
+            {...form.getInputProps("email")}
+          />
           <PasswordInput
             label="Password"
+            placeholder="Your password"
             required
+            mt="md"
             {...form.getInputProps("password")}
           />
-          <div style={styles.buttonStyle}>
-            <Button type="submit">Log In</Button>
-          </div>
+          <Group position="apart" mt="lg">
+            <Checkbox label="Remember me" sx={{ lineHeight: 1 }} />
+            <Anchor<"a">
+              onClick={(event) => event.preventDefault()}
+              href="#"
+              size="sm"
+            >
+              Forgot password?
+            </Anchor>
+          </Group>
+          <Button type="submit" fullWidth mt="xl">
+            Sign in
+          </Button>
         </form>
-      </div>
-    </Center>
+      </Paper>
+    </Container>
   );
 };
 

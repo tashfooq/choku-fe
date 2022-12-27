@@ -21,19 +21,22 @@ const MaterialPicker = ({
   // replacing this with setter from context
   // type issue here
   const [selected, setSelected] = useState<any[]>([]);
-  const { setSelectedMaterialIds } = useContext(
+  const { selectedMaterialIds, setSelectedMaterialIds } = useContext(
     ProgressContext
   ) as ProgressContextType;
 
   const getMaterial = async () => {
-    const books = await contentService.getTextbooksService();
+    const books = await contentService.getAllTextbooks();
+    console.log(books);
     const formatted = books.map((b: any) => {
       return { value: b.textbook_id, label: b.name };
     });
+    console.log(formatted);
     setMultiSelectData(formatted);
   };
 
   const saveMaterials = () => {
+    console.log(selectedMaterialIds);
     setSelectedMaterialIds(selected);
   };
 
@@ -74,7 +77,13 @@ const MaterialPicker = ({
     );
   }
 
-  return <>This is work in progress</>;
+  return (
+    <>
+      {multiSelectData.map((e) => {
+        <div>{e}</div>;
+      })}
+    </>
+  );
 };
 
 export default MaterialPicker;

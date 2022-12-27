@@ -17,7 +17,6 @@ type TopbarProps = {
 };
 
 const Topbar = ({ opened, setOpened }: TopbarProps) => {
-  console.log(opened);
   const theme = useMantineTheme();
   return (
     <Header height={70} p="md">

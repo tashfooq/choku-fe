@@ -4,13 +4,12 @@ import { apiRoutes } from "../common/constants";
 const { content } = apiRoutes;
 
 // this needs to renamed to getTextbooks
-const getTextbooksService = async () => {
+const getAllTextbooks = async () => {
   const response = await axios.get(`${content}/textbooks`, {
     headers: {
       Authorization: "Bearer " + localStorage.getItem("accessToken"),
     },
   });
-  console.log(response);
   return response.data.textbooks || [];
 };
 
@@ -33,11 +32,11 @@ const getSubChapters = async (chapterId: number) => {
     },
   });
   // should see what happens to this destructuring the response.data does not exist
-  return response.data.subtopics || [];
+  return response.data.subchapters || [];
 };
 
 export const contentService = {
-  getTextbooksService,
+  getAllTextbooks,
   getChapters,
   getSubChapters,
 };
