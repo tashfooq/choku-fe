@@ -1,18 +1,23 @@
 import React from "react";
 import { Title, Center, Button, Box } from "@mantine/core";
-import { useNavigate } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const Home = () => {
-  const navigate = useNavigate();
+  const { loginWithRedirect, logout } = useAuth0();
   return (
-    // <div>Home</div>
     <div style={{ marginTop: 200 }}>
       <Center>
         <Title>A comprehensive Medical School Progress Tracker</Title>
       </Center>
       <Box>
-        <Button onClick={() => navigate("/login")}>Login</Button>
-        <Button>Sign Up</Button>
+        <Button onClick={() => loginWithRedirect()}>Login</Button>
+        <Button
+          onClick={() =>
+            logout({ logoutParams: { returnTo: window.location.origin } })
+          }
+        >
+          Logout
+        </Button>
       </Box>
     </div>
   );

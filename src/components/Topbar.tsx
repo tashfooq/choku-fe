@@ -7,9 +7,6 @@ import {
   Title,
   useMantineTheme,
 } from "@mantine/core";
-import { IconTallymarks } from "@tabler/icons";
-import ChokuDots from "../choku_dots.svg";
-// import ChokuDots from "../ChokuDots";
 
 type TopbarProps = {
   opened: boolean;
@@ -41,7 +38,7 @@ const Topbar = ({ opened, setOpened }: TopbarProps) => {
         </ThemeIcon>
         <Title order={3}>Choku</Title> */}
         {/* <ChokuDots width="30" height="30" /> */}
-        <img src={ChokuDots} width={100} alt="website logo" />
+        <img src="/logo-no-background.png" width={70} height={70} alt="Choku" />
         {/* <ChokuDots width="288" height="288" /> */}
       </div>
     </Header>

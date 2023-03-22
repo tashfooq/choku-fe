@@ -1,26 +1,25 @@
-import {
-  createContext,
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useState,
-} from "react";
+import { createContext, ReactNode, useState } from "react";
 
 export type AuthContextType = {
-  isLoggedIn: boolean;
-  // setIsLoggedIn: Dispatch<SetStateAction<boolean>>;
+  token: string;
+  setToken: (token: string) => void;
 };
 
-type AuthProviderProps = {
+export type AuthProviderProps = {
   children: ReactNode;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const isLoggedIn = localStorage.getItem("accessToken") !== null;
+  const [token, setToken] = useState("");
   return (
-    <AuthContext.Provider value={{ isLoggedIn }}>
+    <AuthContext.Provider
+      value={{
+        token,
+        setToken,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

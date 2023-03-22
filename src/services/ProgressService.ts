@@ -1,26 +1,25 @@
 import axios from "axios";
+import { useContext } from "react";
 import { apiRoutes } from "../common/constants";
+import AuthContext, { AuthContextType } from "../context/AuthContext";
 import { ProgressDto } from "../context/ProgressContext";
 
 const { progress } = apiRoutes;
+// const { token } = useContext(AuthContext) as AuthContextType;
 
 const getProgress = async () => {
-  try {
-    const response = await axios.get(`${progress}/`, {
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("accessToken"),
-      },
-    });
-    return response.data || [];
-  } catch (err) {
-    console.log(err);
-  }
+  const response = await axios.get(`${progress}/`, {
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token"),
+    },
+  });
+  return response.data;
 };
 
 const updateProgress = async (prog: ProgressDto) => {
   const response = await axios.post(`${progress}/`, prog, {
     headers: {
-      Authorization: "Bearer " + localStorage.getItem("accessToken"),
+      Authorization: "Bearer " + localStorage.getItem("token"),
     },
   });
   return response;

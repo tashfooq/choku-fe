@@ -7,10 +7,10 @@ const { content } = apiRoutes;
 const getAllTextbooks = async () => {
   const response = await axios.get(`${content}/textbooks`, {
     headers: {
-      Authorization: "Bearer " + localStorage.getItem("accessToken"),
+      Authorization: "Bearer " + localStorage.getItem("token"),
     },
   });
-  return response.data.textbooks || [];
+  return response.data || [];
 };
 
 const getChapters = async (textbookId: number) => {
@@ -18,7 +18,7 @@ const getChapters = async (textbookId: number) => {
     `${content}/textbooks/${textbookId}/chapters`,
     {
       headers: {
-        Authorization: "Bearer " + localStorage.getItem("accessToken"),
+        Authorization: "Bearer " + localStorage.getItem("token"),
       },
     }
   );
@@ -26,17 +26,27 @@ const getChapters = async (textbookId: number) => {
 };
 
 const getSubChapters = async (chapterId: number) => {
-  const response = await axios.get(`${content}/subtopic/${chapterId}`, {
+  const response = await axios.get(`${content}/subchapter/${chapterId}`, {
     headers: {
-      Authorization: "Bearer " + localStorage.getItem("accessToken"),
+      Authorization: "Bearer " + localStorage.getItem("token"),
     },
   });
   // should see what happens to this destructuring the response.data does not exist
   return response.data.subchapters || [];
 };
 
+const getSubtopics = async (subchapterId: number) => {
+  const response = await axios.get(`${content}/subtopic/${subchapterId}`, {
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token"),
+    },
+  });
+  return response.data.subtopics || [];
+};
+
 export const contentService = {
   getAllTextbooks,
   getChapters,
   getSubChapters,
+  getSubtopics,
 };
