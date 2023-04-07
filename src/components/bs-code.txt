@@ -38,3 +38,12 @@
     deepFake[itemIdx] = { ...item, checked: true };
     setSubChapters(deepFake);
   };
+              
+              {row.getIsExpanded() && (
+                <tr>
+                  {/* 2nd row is a custom 1 cell row */}
+                  <td colSpan={row.getVisibleCells().length}>
+                    {renderSubComponent({ row })}
+                  </td>
+                </tr>
+              )}

@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { AuthProvider } from "./context/AuthContext";
 import MaterialPicker from "./components/MaterialPicker";
+import Test from "./components/rt-expand-test";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ function App() {
               <Routes>
                 <Route index element={<Shell content={<Home />} />} />
                 <Route path="home" element={<Shell content={<Home />} />} />
+                <Route path="text" element={<Test />} />
                 <Route
                   path="picker"
                   element={

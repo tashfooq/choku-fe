@@ -1,33 +1,23 @@
-import React, { useState, useEffect, useContext } from "react";
-import {
-  Container,
-  Group,
-  Accordion,
-  Button,
-  Select,
-  Table,
-} from "@mantine/core";
-import { IconDeviceFloppy, IconBook2 } from "@tabler/icons";
-import MaterialPicker from "./MaterialPicker";
+import React, { useState, useEffect, useContext, Fragment } from "react";
+import { Container, Group, Select, Table, Checkbox, Box } from "@mantine/core";
 import { contentService } from "../services/ContentService";
 import ProgressContext, {
   ProgressContextType,
   Progress,
 } from "../context/ProgressContext";
-import Items from "./Items";
-import AccordionItem from "./AccordionItem";
 import { useQuery } from "@tanstack/react-query";
 import { progressService } from "../services/ProgressService";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
-import AuthContext, { AuthContextType } from "../context/AuthContext";
 import { AxiosError } from "axios";
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
+  Row,
   useReactTable,
 } from "@tanstack/react-table";
+import { IconCaretDown, IconCaretRight } from "@tabler/icons";
 
 interface Item {
   id: number;
@@ -51,39 +41,23 @@ export interface SubTopic extends Item {
   subchapter_id: number;
 }
 
-const columnHelper = createColumnHelper<Chapter>();
-
-const columns = [
-  columnHelper.accessor("name", {
-    cell: (info) => info.getValue(),
-    footer: (info) => info.column.id,
-  }),
-];
-
 const Tracker = () => {
   const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
   const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
-      // if (!isLoading && !isAuthenticated) {
-      //   navigate("/home");
-      // } else {
-      //   const token = await getAccessTokenSilently();
-      //   console.log(token);
-      //   localStorage.setItem("token", token);
-      // }
       const token = await getAccessTokenSilently();
-      console.log(token);
       localStorage.setItem("token", token);
     })();
-  }, [isLoading, isAuthenticated, navigate, getAccessTokenSilently]);
+  }, [isLoading, getAccessTokenSilently]);
 
+  const [tabledata, setTableData] = useState([]);
   const [textbooks, setTextbooks] = useState([]);
   const [chapters, setChapters] = useState([]);
   const [textbookSelectValue, setTextbookSelectValue] = useState<string | null>(
     null
-  ); //these needs to be renamed to something more appropriate
+  );
   // const [subChapters, setSubChapters] = useState<any[]>([]); //figure out a more appropriate type for this and avoid using any
   // const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const { updateProgress, selectedTextbookIds, setSelectedTextbookIds } =
@@ -98,6 +72,42 @@ const Tracker = () => {
       }
     },
   });
+
+  const columnHelper = createColumnHelper<Chapter>();
+
+  const columns = [
+    columnHelper.accessor("name", {
+      // cell: (info) => info.getValue(),
+      cell: ({ row, getValue }) => (
+        <>
+          <Box style={{ display: "flex", gap: 10 }}>
+            <Checkbox
+              {...{
+                checked: row.getIsSelected(),
+                indeterminate: row.getIsSomeSelected(),
+                onChange: row.getToggleSelectedHandler(),
+              }}
+            />
+            <button {...{ onClick: row.getToggleExpandedHandler() }} />
+            {row.getIsExpanded() ? (
+              <IconCaretDown />
+            ) : (
+              // <IconCaretRight
+              //   onClick={() => {
+              //     row.getToggleExpandedHandler();
+              //     handleChapterSelect(Number(row.original.id));
+              //   }}
+              // />
+              <IconCaretRight onClick={row.getToggleExpandedHandler} />
+              // <button {...{ onClick: row.getToggleExpandedHandler() }} />
+            )}
+            {getValue()}
+          </Box>
+        </>
+      ),
+      footer: (info) => info.column.id,
+    }),
+  ];
 
   const getTextbooks = async () => {
     const allTextbooks = await contentService.getAllTextbooks();
@@ -119,8 +129,8 @@ const Tracker = () => {
 
   const getChapters = async (textbookId: number) => {
     const chapters = await contentService.getChapters(textbookId);
-    console.log(chapters);
     setChapters(chapters);
+    // setTableData(chapters);
   };
 
   // const saveProgress = async () => {
@@ -152,7 +162,15 @@ const Tracker = () => {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  console.log(chapters);
+  const handleChapterSelect = async (id: number) => {
+    console.log(id);
+    const subchapters = await contentService.getSubChapters(id);
+    console.log(subchapters);
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Container size="xl" px="md">
@@ -201,6 +219,7 @@ const Tracker = () => {
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
+            // <Fragment key={row.id}>
             <tr key={row.id}>
               {row.getVisibleCells().map((cell) => (
                 <td key={cell.id}>
@@ -208,6 +227,7 @@ const Tracker = () => {
                 </td>
               ))}
             </tr>
+            // </Fragment>
           ))}
         </tbody>
       </Table>
@@ -235,6 +255,15 @@ const Tracker = () => {
         closer={setSettingsModalOpen}
       /> */}
     </Container>
+  );
+};
+
+const renderSubComponent = ({ row }: { row: Row<Chapter> }) => {
+  console.log(row.getIsExpanded);
+  return (
+    <>
+      <div>Hello</div>
+    </>
   );
 };
 
