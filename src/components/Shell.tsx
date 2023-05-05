@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { AppShell, Footer, useMantineTheme, Center } from "@mantine/core";
-import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
+import { Testbar } from "./Testbar";
 
 type ShellProps = {
   content: React.ReactNode;
@@ -30,7 +30,7 @@ const Shell = ({
       }}
       navbarOffsetBreakpoint="sm"
       fixed
-      navbar={showNavbar ? <Sidebar opened={opened} /> : undefined}
+      navbar={showNavbar ? <Testbar opened={opened} /> : undefined}
       header={
         showHeader ? (
           <Topbar opened={opened} setOpened={setOpened} />
