@@ -1,102 +1,163 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, Fragment } from "react";
 import {
   Container,
   Group,
-  Accordion,
-  Button,
   Select,
   Table,
-  NumberInput,
+  Checkbox,
+  Box,
+  Button,
+  ScrollArea,
 } from "@mantine/core";
-import {
-  IconCircleDashed,
-  IconCircleCheck,
-  IconBook,
-  IconDeviceFloppy,
-  IconBook2,
-} from "@tabler/icons";
-import TrackerSettings from "./TrackerSettings";
+import { produce } from "immer";
 import { contentService } from "../services/ContentService";
-import { authService } from "../services/AuthService";
-
-type SubChapter = {
-  id: number;
-  name: string;
-  chapter_id: number;
-  checked?: boolean;
-  passes?: number;
-};
+import ProgressContext, {
+  ProgressContextType,
+  Progress,
+  ProgressDto,
+} from "../context/ProgressContext";
+import { useQuery } from "@tanstack/react-query";
+import { progressService } from "../services/ProgressService";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
+import { IconBook2, IconDeviceFloppy } from "@tabler/icons";
+import MaterialPicker from "./MaterialPicker";
+import { Chapter, SubChapter, SubTopic } from "../types";
+import { DataTable } from "mantine-datatable";
 
 const Tracker = () => {
+  const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    (async () => {
+      const token = await getAccessTokenSilently();
+      localStorage.setItem("token", token);
+    })();
+  }, [isLoading, getAccessTokenSilently]);
+
   const [textbooks, setTextbooks] = useState([]);
-  const [chapters, setChapters] = useState([]);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
   const [textbookSelectValue, setTextbookSelectValue] = useState<string | null>(
-    ""
-  ); //these needs to be renamed to something more appropriate
-  const [subChapters, setSubChapters] = useState<any[]>([]); //figure out a more appropriate type for this and avoid using any
+    null
+  );
+  const [subChapters, setSubChapters] = useState<SubChapter[]>([]); //figure out a more appropriate type for this and avoid using any
+  const [subTopics, setSubTopics] = useState<SubTopic[]>([]);
+  const [isExpanded, setIsExpanded] = useState<boolean[]>([]);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const { updateProgress, selectedTextbookIds, setSelectedTextbookIds } =
+    useContext(ProgressContext) as ProgressContextType;
+
+  const { data: progy, isSuccess } = useQuery({
+    queryKey: ["progress"],
+    queryFn: progressService.getProgress,
+    onError(err: AxiosError) {
+      if (err.response?.status === 404) {
+        navigate("/picker");
+      }
+    },
+  });
 
   const getTextbooks = async () => {
-    const textbooks = await contentService.getTextbooksService();
-    setTextbooks(textbooks);
+    // this needs to be updated to look at selectedTextbookIds
+    const allTextbooks = await contentService.getAllTextbooks();
+    if (isSuccess) {
+      if (!!allTextbooks) {
+        setTextbooks(
+          allTextbooks.filter(({ id }: any) =>
+            progy.selectedTextbookIds.includes(id)
+          )
+        );
+      }
+      setSelectedTextbookIds(progy.selectedTextbookIds);
+      return;
+    }
+    setSelectedTextbookIds([]);
   };
 
   const getChapters = async (textbookId: number) => {
     const chapters = await contentService.getChapters(textbookId);
     setChapters(chapters);
+    // setTableData(chapters);
   };
 
-  const getSubChaptersByChapterId = async (chapterId: number) => {
-    const subChaps = await contentService.getSubChapters(chapterId);
+  const getSubChapters = async (chapterId: number) => {
+    // use immer here to append
+    const subChapters = await contentService.getSubChapters(chapterId);
+    setSubChapters(subChapters);
+  };
+
+  const handleChapterSelect = (chapterId: number) => {
+    const index = chapters.findIndex((chapter) => chapter.id === chapterId);
+    const updatedChapters = produce(chapters, (draft) => {
+      draft[index].checked = !draft[index].checked;
+    });
+    setChapters(updatedChapters);
+  };
+
+  const handleChapterExpand = async (chapterId: number) => {
     if (
-      subChapters.filter((sC: any) => sC.chapter_id === chapterId).length !== 0
+      subChapters.filter((subChapter) => subChapter.chapterId === chapterId)
+        .length === 0
     ) {
-      return;
+      console.log("fetching subchapters");
+      await getSubChapters(chapterId);
     }
-    setSubChapters((prev: any) => [...prev, ...subChaps]);
+  };
+
+  const handleSubChapterSelect = (subChapterId: number) => {
+    const index = subChapters.findIndex(
+      (subChapter) => subChapter.id === subChapterId
+    );
+    const updatedSubChapters = produce(subChapters, (draft) => {
+      draft[index].checked = !draft[index].checked;
+    });
+    setSubChapters(updatedSubChapters);
   };
 
   const saveProgress = async () => {
-    const { id } = await authService.getUser();
-    const reduced = subChapters.reduce((prev, curr) => {
-      const prog = {
-        id: curr.id,
-        ...(curr.passes && { passes: curr.passes }),
-      };
-      curr.checked === true && prev.push(prog);
-      return prev;
-    }, []);
-    console.log(reduced);
-    const progject = { userId: id, subChapterProgress: reduced };
-    console.log(progject);
-    // console.log(filteredProgress);
+    // reduced list of ids for checked chapters
+    const checkedChapterIds = chapters
+      .filter((chapter) => chapter.checked)
+      .map((chapter) => chapter.id);
+    // reduced list of ids for checked subchapters
+    const checkedSubChapterIds = subChapters
+      .filter((subChapter) => subChapter.checked)
+      .map((subChapter) => subChapter.id);
+    // reduced list of ids for checked subtopics
+    // const checkedSubTopicIds = subTopics
+    //   .filter((subTopic) => subTopic.checked)
+    //   .map((subTopic) => subTopic.id);
+
+    const modifiedProgress = produce(progy, (draft: ProgressDto) => {
+      const chaptersIdsToBeAdded = checkedChapterIds.filter(
+        (id) => !draft.chapterProgress.includes(id)
+      );
+      const subchapterIdsToBeAdded = checkedSubChapterIds.filter(
+        (id) => !draft.subchapterProgress.includes(id)
+      );
+      draft.chapterProgress.push(...chaptersIdsToBeAdded);
+      draft.subchapterProgress.push(...subchapterIdsToBeAdded);
+    });
+    const {
+      selectedTextbookIds,
+      chapterProgress,
+      subchapterProgress,
+      subtopicProgress,
+    } = modifiedProgress as unknown as ProgressDto;
+    const updatedProgress: Progress = {
+      selectedTextbookIds,
+      chapterProgress,
+      subchapterProgress,
+      subtopicProgress,
+    };
+    updateProgress(updatedProgress);
   };
 
-  const checkOrPasses = (subChapterId: number, passes?: number) => {
-    const subChap = subChapters.find((sC) => sC.id === subChapterId);
-    const subChapIdx = subChapters.findIndex((sC) => sC.id === subChapterId);
-    const deepFake: SubChapter[] = [...subChapters];
-    if (passes) {
-      deepFake[subChapIdx] = { ...subChap, passes };
-      setSubChapters(deepFake);
-      return;
-    }
-    if (Object.keys(subChap).includes("checked")) {
-      deepFake[subChapIdx] =
-        subChap?.checked === true
-          ? { ...subChap, checked: false }
-          : { ...subChap, checked: true };
-      setSubChapters(deepFake);
-      return;
-    }
-    deepFake[subChapIdx] = { ...subChap, checked: true };
-    setSubChapters(deepFake);
-  };
-
-  // this needs to turn into fetch previosly selected textbooks (a part of progress)
-  useEffect(() => {
-    getTextbooks();
-  }, []);
+  // useEffect(() => {
+  //   getTextbooks();
+  // }, [selectedTextbookIds]);
 
   useEffect(() => {
     var textbookId = Number(textbookSelectValue);
@@ -105,83 +166,54 @@ const Tracker = () => {
     }
   }, [textbookSelectValue]);
 
+  const isChapter = (obj: any): obj is Chapter => {
+    return obj.hasOwnProperty("textbookId");
+  };
+
+  const childEntityMap = (entity: Chapter | SubChapter) => {
+    if (isChapter(entity)) {
+      return { entity: subChapters, handler: handleSubChapterSelect };
+    }
+    return { entity: subTopics, handler: handleChapterExpand };
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <Container size="md" px="md">
+    <Container size="xl" px="md">
       <Group style={{ margin: 10 }} position="apart">
         <Select
           value={textbookSelectValue}
           placeholder="Pick a resource"
+          onClick={getTextbooks}
           onChange={setTextbookSelectValue}
-          data={textbooks.map(({ textbook_id, name }) => {
-            return { value: textbook_id, label: name };
+          data={textbooks.map(({ id, name }) => {
+            return { value: id, label: name };
           })}
         />
         <div>
           <Button
-            leftIcon={<IconBook2 size={18} />}
+            leftIcon={<IconBook2 />}
             style={{ marginRight: 10 }}
             onClick={() => setSettingsModalOpen(true)}
           >
             Update Tracker Material
           </Button>
-          <Button
-            leftIcon={<IconDeviceFloppy size={18} />}
-            onClick={saveProgress}
-          >
+          <Button leftIcon={<IconDeviceFloppy />} onClick={saveProgress}>
             Save
           </Button>
         </div>
       </Group>
-      <Accordion>
-        {chapters?.map(({ chapter_id, name }) => {
-          return (
-            <Accordion.Item
-              key={chapter_id}
-              value={name}
-              // label={name}
-              onClick={() => getSubChaptersByChapterId(chapter_id)}
-            >
-              <Accordion.Control>{name}</Accordion.Control>
-              <Accordion.Panel>
-                <Table>
-                  <tbody>
-                    {subChapters
-                      .filter((sC) => sC.chapter_id === chapter_id)
-                      .map(({ name, id }) => {
-                        return (
-                          <tr key={id}>
-                            <td>{name}</td>
-                            <td>
-                              <div onClick={() => checkOrPasses(id)}>
-                                {subChapters.find((sC) => sC.id === id)
-                                  ?.checked ? (
-                                  <IconCircleCheck color="green" />
-                                ) : (
-                                  <IconCircleDashed />
-                                )}
-                              </div>
-                            </td>
-                            <td>
-                              <NumberInput
-                                placeholder="Number of passes"
-                                min={1}
-                                icon={<IconBook size={18} />}
-                                onChange={(passNumber) =>
-                                  checkOrPasses(id, passNumber)
-                                }
-                              />
-                            </td>
-                          </tr>
-                        );
-                      })}
-                  </tbody>
-                </Table>
-              </Accordion.Panel>
-            </Accordion.Item>
-          );
-        })}
-      </Accordion>
-      <TrackerSettings
+
+      <DataTable
+        columns={[{ accessor: "name", title: "Name" }]}
+        records={chapters}
+      />
+
+      <MaterialPicker
+        isModalView={true}
         isOpen={settingsModalOpen}
         closer={setSettingsModalOpen}
       />
