@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, Fragment } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Container,
   Group,
@@ -9,12 +9,9 @@ import {
   Button,
   ScrollArea,
 } from "@mantine/core";
-import { produce } from "immer";
 import { contentService } from "../services/ContentService";
 import ProgressContext, {
   ProgressContextType,
-  Progress,
-  ProgressDto,
 } from "../context/ProgressContext";
 import { useQuery } from "@tanstack/react-query";
 import { progressService } from "../services/ProgressService";
@@ -23,8 +20,9 @@ import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
 import { IconBook2, IconDeviceFloppy } from "@tabler/icons";
 import MaterialPicker from "./MaterialPicker";
-import { Chapter, SubChapter, SubTopic } from "../types";
+import { Chapter, Progress, ProgressDto, SubChapter, SubTopic } from "../types";
 import { DataTable } from "mantine-datatable";
+import { produce } from "immer";
 
 const Tracker = () => {
   const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
