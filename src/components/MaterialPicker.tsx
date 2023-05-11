@@ -11,13 +11,13 @@ import {
   Stack,
 } from "@mantine/core";
 import { contentService } from "../services/ContentService";
-import { IconDeviceFloppy } from "@tabler/icons";
+import { IconDeviceFloppy } from "@tabler/icons-react";
 import ProgressContext, {
   ProgressContextType,
 } from "../context/ProgressContext";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import produce from "immer";
+import * as immer from "immer";
 
 type MaterialPickerProps = {
   isModalView: boolean;
@@ -58,7 +58,7 @@ const MaterialPicker = ({
       setSelectedTextbookIds(selected);
       closer(false);
       if (progress !== null) {
-        const modifiedProgress = produce(progress, (draft) => {
+        const modifiedProgress = immer.produce(progress, (draft) => {
           draft.selectedTextbookIds = selected;
         });
         updateProgress(modifiedProgress);
@@ -69,7 +69,7 @@ const MaterialPicker = ({
     }
     setSelectedTextbookIds(selected);
     if (progress !== null) {
-      const modifiedProgress = produce(progress, (draft) => {
+      const modifiedProgress = immer.produce(progress, (draft) => {
         draft.selectedTextbookIds = selected;
       });
       updateProgress(modifiedProgress);

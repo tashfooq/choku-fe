@@ -18,11 +18,12 @@ import { progressService } from "../services/ProgressService";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
-import { IconBook2, IconDeviceFloppy } from "@tabler/icons";
+import { IconBook2, IconDeviceFloppy } from "@tabler/icons-react";
 import MaterialPicker from "./MaterialPicker";
 import { Chapter, Progress, ProgressDto, SubChapter, SubTopic } from "../types";
 import { DataTable } from "mantine-datatable";
-import { produce } from "immer";
+import * as immer from "immer";
+import SubchapterTable from "./SubchapterTable";
 
 const Tracker = () => {
   const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
@@ -41,8 +42,7 @@ const Tracker = () => {
     null
   );
   const [subChapters, setSubChapters] = useState<SubChapter[]>([]); //figure out a more appropriate type for this and avoid using any
-  const [subTopics, setSubTopics] = useState<SubTopic[]>([]);
-  const [isExpanded, setIsExpanded] = useState<boolean[]>([]);
+  const [expandedRecordIds, setExpandedRecordIds] = useState<number[]>([]);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const { updateProgress, selectedTextbookIds, setSelectedTextbookIds } =
     useContext(ProgressContext) as ProgressContextType;
@@ -80,38 +80,12 @@ const Tracker = () => {
     // setTableData(chapters);
   };
 
-  const getSubChapters = async (chapterId: number) => {
-    // use immer here to append
-    const subChapters = await contentService.getSubChapters(chapterId);
-    setSubChapters(subChapters);
-  };
-
   const handleChapterSelect = (chapterId: number) => {
     const index = chapters.findIndex((chapter) => chapter.id === chapterId);
-    const updatedChapters = produce(chapters, (draft) => {
+    const updatedChapters = immer.produce(chapters, (draft) => {
       draft[index].checked = !draft[index].checked;
     });
     setChapters(updatedChapters);
-  };
-
-  const handleChapterExpand = async (chapterId: number) => {
-    if (
-      subChapters.filter((subChapter) => subChapter.chapterId === chapterId)
-        .length === 0
-    ) {
-      console.log("fetching subchapters");
-      await getSubChapters(chapterId);
-    }
-  };
-
-  const handleSubChapterSelect = (subChapterId: number) => {
-    const index = subChapters.findIndex(
-      (subChapter) => subChapter.id === subChapterId
-    );
-    const updatedSubChapters = produce(subChapters, (draft) => {
-      draft[index].checked = !draft[index].checked;
-    });
-    setSubChapters(updatedSubChapters);
   };
 
   const saveProgress = async () => {
@@ -128,7 +102,7 @@ const Tracker = () => {
     //   .filter((subTopic) => subTopic.checked)
     //   .map((subTopic) => subTopic.id);
 
-    const modifiedProgress = produce(progy, (draft: ProgressDto) => {
+    const modifiedProgress = immer.produce(progy, (draft: ProgressDto) => {
       const chaptersIdsToBeAdded = checkedChapterIds.filter(
         (id) => !draft.chapterProgress.includes(id)
       );
@@ -164,17 +138,6 @@ const Tracker = () => {
     }
   }, [textbookSelectValue]);
 
-  const isChapter = (obj: any): obj is Chapter => {
-    return obj.hasOwnProperty("textbookId");
-  };
-
-  const childEntityMap = (entity: Chapter | SubChapter) => {
-    if (isChapter(entity)) {
-      return { entity: subChapters, handler: handleSubChapterSelect };
-    }
-    return { entity: subTopics, handler: handleChapterExpand };
-  };
-
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -208,6 +171,16 @@ const Tracker = () => {
       <DataTable
         columns={[{ accessor: "name", title: "Name" }]}
         records={chapters}
+        rowExpansion={{
+          allowMultiple: false,
+          expanded: {
+            recordIds: expandedRecordIds,
+            onRecordIdsChange: setExpandedRecordIds,
+          },
+          content: ({ record, recordIndex }) => (
+            <SubchapterTable chapterId={record.id} />
+          ),
+        }}
       />
 
       <MaterialPicker

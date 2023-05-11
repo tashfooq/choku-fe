@@ -6,6 +6,7 @@ import {
   Container,
   rem,
 } from "@mantine/core";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -82,23 +83,22 @@ const useStyles = createStyles((theme) => ({
 
 const Banner = () => {
   const { classes } = useStyles();
+  const { loginWithRedirect } = useAuth0();
 
   return (
     <Container className={classes.wrapper} size={1400}>
       <div className={classes.inner}>
         <Title className={classes.title}>
-          Automated AI{" "}
+          A simple{" "}
           <Text component="span" className={classes.highlight} inherit>
-            code reviews
+            progress tracker
           </Text>{" "}
-          for any stack
+          for medical students
         </Title>
 
         <Container p={0} size={600}>
           <Text size="lg" color="dimmed" className={classes.description}>
-            Build more reliable software with AI companion. AI is also trained
-            to detect lazy developers who do nothing and just complain on
-            Twitter.
+            Stop using excel sheets and start tracking your progress with Choku
           </Text>
         </Container>
 
@@ -109,10 +109,14 @@ const Banner = () => {
             variant="default"
             color="gray"
           >
-            Book a demo
+            Sign Up
           </Button>
-          <Button className={classes.control} size="lg">
-            Purchase a license
+          <Button
+            onClick={() => loginWithRedirect()}
+            className={classes.control}
+            size="lg"
+          >
+            Login
           </Button>
         </div>
       </div>
