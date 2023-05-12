@@ -35,10 +35,46 @@ const getSubChapters = async (chapterId: number) => {
   return response.data.subchapters || [];
 };
 
-const getSubtopics = async (subchapterId: number) => {
+const getSubTopics = async (subchapterId: number) => {
   const response = await axios.get(`${content}/subtopic/${subchapterId}`, {
     headers: {
       Authorization: "Bearer " + localStorage.getItem("token"),
+    },
+  });
+  return response.data.subtopics || [];
+};
+
+const getChaptersByIds = async (chapterIds: number[]) => {
+  const response = await axios.get(`${content}/chapters`, {
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token"),
+    },
+    params: {
+      ids: chapterIds,
+    },
+  });
+  return response.data.chapters || [];
+};
+
+const getSubChaptersByIds = async (subchapterIds: number[]) => {
+  const response = await axios.get(`${content}/subchapters`, {
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token"),
+    },
+    params: {
+      ids: subchapterIds,
+    },
+  });
+  return response.data.subchapters || [];
+};
+
+const getSubTopicsByIds = async (subtopicIds: number[]) => {
+  const response = await axios.get(`${content}/subtopics`, {
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token"),
+    },
+    params: {
+      ids: subtopicIds,
     },
   });
   return response.data.subtopics || [];
@@ -48,5 +84,8 @@ export const contentService = {
   getAllTextbooks,
   getChapters,
   getSubChapters,
-  getSubtopics,
+  getSubtopics: getSubTopics,
+  getChaptersByIds,
+  getSubChaptersByIds,
+  getSubTopicsByIds,
 };

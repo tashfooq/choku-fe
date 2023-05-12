@@ -3,11 +3,10 @@ import {
   Container,
   Group,
   Select,
-  Table,
-  Checkbox,
-  Box,
   Button,
-  ScrollArea,
+  Text,
+  createStyles,
+  px,
 } from "@mantine/core";
 import { contentService } from "../services/ContentService";
 import ProgressContext, {
@@ -18,16 +17,33 @@ import { progressService } from "../services/ProgressService";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
-import { IconBook2, IconDeviceFloppy } from "@tabler/icons-react";
+import {
+  IconBook2,
+  IconBrush,
+  IconChevronRight,
+  IconDeviceFloppy,
+} from "@tabler/icons-react";
 import MaterialPicker from "./MaterialPicker";
-import { Chapter, Progress, ProgressDto, SubChapter, SubTopic } from "../types";
 import { DataTable } from "mantine-datatable";
-import * as immer from "immer";
 import SubchapterTable from "./SubchapterTable";
+import { useChapter } from "../common/queries";
+
+const useStyles = createStyles((theme) => ({
+  expandIcon: {
+    transition: "transform 0.2s ease",
+  },
+  expandIconRotated: {
+    transform: "rotate(90deg)",
+  },
+  subTopicName: {
+    marginLeft: px(theme.spacing.xl) * 2,
+  },
+}));
 
 const Tracker = () => {
   const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
   const navigate = useNavigate();
+  const { cx, classes } = useStyles();
 
   useEffect(() => {
     (async () => {
@@ -37,17 +53,20 @@ const Tracker = () => {
   }, [isLoading, getAccessTokenSilently]);
 
   const [textbooks, setTextbooks] = useState([]);
-  const [chapters, setChapters] = useState<Chapter[]>([]);
   const [textbookSelectValue, setTextbookSelectValue] = useState<string | null>(
     null
   );
-  const [subChapters, setSubChapters] = useState<SubChapter[]>([]); //figure out a more appropriate type for this and avoid using any
   const [expandedRecordIds, setExpandedRecordIds] = useState<number[]>([]);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
-  const { updateProgress, selectedTextbookIds, setSelectedTextbookIds } =
-    useContext(ProgressContext) as ProgressContextType;
+  const {
+    saveProgress,
+    setSelectedTextbookIds,
+    selectedChapters,
+    setSelectedChapters,
+  } = useContext(ProgressContext) as ProgressContextType;
 
-  const { data: progy, isSuccess } = useQuery({
+  // this needs using useProgress hook and then navigating to picker if no progress
+  const { data: progress, isSuccess } = useQuery({
     queryKey: ["progress"],
     queryFn: progressService.getProgress,
     onError(err: AxiosError) {
@@ -57,6 +76,13 @@ const Tracker = () => {
     },
   });
 
+  // wrap the entire table to render if chapter exists
+  const {
+    data: chapters,
+    isLoading: isChaptersLoading,
+    isSuccess: isChaptersSuccess,
+  } = useChapter(Number(textbookSelectValue));
+
   const getTextbooks = async () => {
     // this needs to be updated to look at selectedTextbookIds
     const allTextbooks = await contentService.getAllTextbooks();
@@ -64,79 +90,15 @@ const Tracker = () => {
       if (!!allTextbooks) {
         setTextbooks(
           allTextbooks.filter(({ id }: any) =>
-            progy.selectedTextbookIds.includes(id)
+            progress.selectedTextbookIds.includes(id)
           )
         );
       }
-      setSelectedTextbookIds(progy.selectedTextbookIds);
+      setSelectedTextbookIds(progress.selectedTextbookIds);
       return;
     }
     setSelectedTextbookIds([]);
   };
-
-  const getChapters = async (textbookId: number) => {
-    const chapters = await contentService.getChapters(textbookId);
-    setChapters(chapters);
-    // setTableData(chapters);
-  };
-
-  const handleChapterSelect = (chapterId: number) => {
-    const index = chapters.findIndex((chapter) => chapter.id === chapterId);
-    const updatedChapters = immer.produce(chapters, (draft) => {
-      draft[index].checked = !draft[index].checked;
-    });
-    setChapters(updatedChapters);
-  };
-
-  const saveProgress = async () => {
-    // reduced list of ids for checked chapters
-    const checkedChapterIds = chapters
-      .filter((chapter) => chapter.checked)
-      .map((chapter) => chapter.id);
-    // reduced list of ids for checked subchapters
-    const checkedSubChapterIds = subChapters
-      .filter((subChapter) => subChapter.checked)
-      .map((subChapter) => subChapter.id);
-    // reduced list of ids for checked subtopics
-    // const checkedSubTopicIds = subTopics
-    //   .filter((subTopic) => subTopic.checked)
-    //   .map((subTopic) => subTopic.id);
-
-    const modifiedProgress = immer.produce(progy, (draft: ProgressDto) => {
-      const chaptersIdsToBeAdded = checkedChapterIds.filter(
-        (id) => !draft.chapterProgress.includes(id)
-      );
-      const subchapterIdsToBeAdded = checkedSubChapterIds.filter(
-        (id) => !draft.subchapterProgress.includes(id)
-      );
-      draft.chapterProgress.push(...chaptersIdsToBeAdded);
-      draft.subchapterProgress.push(...subchapterIdsToBeAdded);
-    });
-    const {
-      selectedTextbookIds,
-      chapterProgress,
-      subchapterProgress,
-      subtopicProgress,
-    } = modifiedProgress as unknown as ProgressDto;
-    const updatedProgress: Progress = {
-      selectedTextbookIds,
-      chapterProgress,
-      subchapterProgress,
-      subtopicProgress,
-    };
-    updateProgress(updatedProgress);
-  };
-
-  // useEffect(() => {
-  //   getTextbooks();
-  // }, [selectedTextbookIds]);
-
-  useEffect(() => {
-    var textbookId = Number(textbookSelectValue);
-    if (textbookId !== 0) {
-      getChapters(textbookId);
-    }
-  }, [textbookSelectValue]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -168,20 +130,45 @@ const Tracker = () => {
         </div>
       </Group>
 
-      <DataTable
-        columns={[{ accessor: "name", title: "Name" }]}
-        records={chapters}
-        rowExpansion={{
-          allowMultiple: false,
-          expanded: {
-            recordIds: expandedRecordIds,
-            onRecordIdsChange: setExpandedRecordIds,
-          },
-          content: ({ record, recordIndex }) => (
-            <SubchapterTable chapterId={record.id} />
-          ),
-        }}
-      />
+      {textbookSelectValue === null ? (
+        <Text>Choose a textbook to get started</Text>
+      ) : (
+        <DataTable
+          columns={[
+            {
+              accessor: "name",
+              title: "Name",
+              render: ({ id, name }) => (
+                <Group spacing="xs">
+                  <IconChevronRight
+                    size="0.9em"
+                    className={cx(classes.expandIcon, {
+                      [classes.expandIconRotated]:
+                        expandedRecordIds.includes(id),
+                    })}
+                  />
+                  <IconBrush size="0.9em" />
+                  <Text>{name}</Text>
+                </Group>
+              ),
+            },
+          ]}
+          records={chapters}
+          fetching={isChaptersLoading}
+          selectedRecords={selectedChapters}
+          onSelectedRecordsChange={setSelectedChapters}
+          rowExpansion={{
+            allowMultiple: false,
+            expanded: {
+              recordIds: expandedRecordIds,
+              onRecordIdsChange: setExpandedRecordIds,
+            },
+            content: ({ record, recordIndex }) => (
+              <SubchapterTable chapterId={record.id} />
+            ),
+          }}
+        />
+      )}
 
       <MaterialPicker
         isModalView={true}

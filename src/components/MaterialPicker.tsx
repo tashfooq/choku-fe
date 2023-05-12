@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Modal,
   Title,
@@ -17,7 +17,7 @@ import ProgressContext, {
 } from "../context/ProgressContext";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import * as immer from "immer";
+import { useProgress } from "../common/queries";
 
 type MaterialPickerProps = {
   isModalView: boolean;
@@ -35,14 +35,21 @@ const MaterialPicker = ({
     isSuccess,
     isLoading,
   } = useQuery({
-    queryKey: ["allTextbooks"],
+    queryKey: ["textbooks"],
     queryFn: contentService.getAllTextbooks,
   });
+  const { data: progress } = useProgress();
   const navigate = useNavigate();
+  const { saveProgress, selectedTextbookIds, setSelectedTextbookIds } =
+    useContext(ProgressContext) as ProgressContextType;
   const [selected, setSelected] = useState<any[]>([]);
-  const { setSelectedTextbookIds, updateProgress, progress } = useContext(
-    ProgressContext
-  ) as ProgressContextType;
+
+  useEffect(() => {
+    if (progress && progress.selectedTextbookIds.length > 0) {
+      setSelected(progress.selectedTextbookIds);
+      setSelectedTextbookIds(progress.selectedTextbookIds);
+    }
+  }, [progress, setSelected, setSelectedTextbookIds]);
 
   const formatForMultiSelect = (): (string | SelectItem)[] => {
     if (!isLoading && isSuccess) {
@@ -56,25 +63,12 @@ const MaterialPicker = ({
   const saveMaterials = () => {
     if (isModalView) {
       setSelectedTextbookIds(selected);
+      saveProgress();
       closer(false);
-      if (progress !== null) {
-        const modifiedProgress = immer.produce(progress, (draft) => {
-          draft.selectedTextbookIds = selected;
-        });
-        updateProgress(modifiedProgress);
-      }
-      // this needs to update progress with react-query data
-      // updateProgress(selected);
       return;
     }
     setSelectedTextbookIds(selected);
-    if (progress !== null) {
-      const modifiedProgress = immer.produce(progress, (draft) => {
-        draft.selectedTextbookIds = selected;
-      });
-      updateProgress(modifiedProgress);
-    }
-    // updateProgress(selected);
+    saveProgress();
     navigate("/tracker");
   };
 
