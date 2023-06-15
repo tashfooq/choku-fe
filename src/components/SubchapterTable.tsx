@@ -11,6 +11,7 @@ import { useSubChapter } from "../common/queries";
 import ProgressContext, {
   ProgressContextType,
 } from "../context/ProgressContext";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const useStyles = createStyles((theme) => ({
   expandIcon: {
@@ -22,7 +23,11 @@ const useStyles = createStyles((theme) => ({
 }));
 
 const SubchapterTable = ({ chapterId }: { chapterId: number }) => {
-  const { data: subChapters, isLoading } = useSubChapter(chapterId);
+  const { isAuthenticated } = useAuth0();
+  const { data: subChapters, isLoading } = useSubChapter(
+    chapterId,
+    isAuthenticated
+  );
   const [expandedRecordIds, setExpandedRecordIds] = useState<number[]>([]);
   // FIGURE OUT CONDITIONAL EXPANSION
   // const [shouldExpand, setShouldExpand] =

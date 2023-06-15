@@ -16,16 +16,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ProgressProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/tracker" element={<Tracker />} />
-            <Route
-              path="/picker"
-              element={<MaterialPicker isModalView={false} />}
-            />
-          </Routes>
-        </BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/tracker" element={<Tracker />} />
+          <Route
+            path="/picker"
+            element={<MaterialPicker isModalView={false} />}
+          />
+        </Routes>
       </ProgressProvider>
     </QueryClientProvider>
   );

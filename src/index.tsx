@@ -3,27 +3,20 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { Auth0Provider } from "@auth0/auth0-react";
+import { BrowserRouter } from "react-router-dom";
+import { Auth0ProviderWithNavigate } from "./context/Auth0ProviderWithNavigate";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 
-const domain: string = process.env.REACT_APP_AUTH0_DOMAIN as string;
-const clientId: string = process.env.REACT_APP_AUTH0_CLIENT_ID as string;
-const audience: string = process.env.REACT_APP_AUTH0_AUDIENCE as string;
-
 root.render(
   <React.StrictMode>
-    <Auth0Provider
-      domain={domain}
-      clientId={clientId}
-      authorizationParams={{
-        redirect_uri: "http://localhost:3000/tracker",
-        audience,
-      }}
-    >
-      <App />
-    </Auth0Provider>
+    <BrowserRouter>
+      <Auth0ProviderWithNavigate>
+        <App />
+      </Auth0ProviderWithNavigate>
+    </BrowserRouter>
   </React.StrictMode>
 );
 

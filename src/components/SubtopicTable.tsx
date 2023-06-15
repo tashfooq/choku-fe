@@ -10,6 +10,7 @@ import { useSubTopic } from "../common/queries";
 import ProgressContext, {
   ProgressContextType,
 } from "../context/ProgressContext";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const useStyles = createStyles((theme) => ({
   subTopicName: {
@@ -18,7 +19,11 @@ const useStyles = createStyles((theme) => ({
 }));
 
 const SubtopicTable = ({ subChapterId }: { subChapterId: number }) => {
-  const { data: subTopics, isLoading } = useSubTopic(subChapterId);
+  const { isAuthenticated } = useAuth0();
+  const { data: subTopics, isLoading } = useSubTopic(
+    subChapterId,
+    isAuthenticated
+  );
   const { selectedSubTopics, setSelectedSubTopics } = useContext(
     ProgressContext
   ) as ProgressContextType;

@@ -42,13 +42,19 @@ const useStyles = createStyles((theme) => ({
 
 const Tracker = () => {
   const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+  const audience = process.env.REACT_APP_AUTH0_AUDIENCE;
+  console.log("isAuthenticated", isAuthenticated);
   const navigate = useNavigate();
   const { cx, classes } = useStyles();
 
   useEffect(() => {
     (async () => {
-      const token = await getAccessTokenSilently();
-      localStorage.setItem("token", token);
+      try {
+        const token = await getAccessTokenSilently();
+        localStorage.setItem("token", token);
+      } catch (err) {
+        console.log(err);
+      }
     })();
   }, [isLoading, getAccessTokenSilently]);
 
@@ -74,14 +80,16 @@ const Tracker = () => {
         navigate("/picker");
       }
     },
+    enabled: isAuthenticated,
   });
 
+  console.log(isAuthenticated && textbookSelectValue !== null);
+
   // wrap the entire table to render if chapter exists
-  const {
-    data: chapters,
-    isLoading: isChaptersLoading,
-    isSuccess: isChaptersSuccess,
-  } = useChapter(Number(textbookSelectValue));
+  const { data: chapters, isLoading: isChaptersLoading } = useChapter(
+    Number(textbookSelectValue),
+    isAuthenticated || textbookSelectValue !== null
+  );
 
   const getTextbooks = async () => {
     // this needs to be updated to look at selectedTextbookIds

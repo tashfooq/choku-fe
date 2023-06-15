@@ -18,6 +18,7 @@ import ProgressContext, {
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useProgress } from "../common/queries";
+import { useAuth0 } from "@auth0/auth0-react";
 
 type MaterialPickerProps = {
   isModalView: boolean;
@@ -30,6 +31,7 @@ const MaterialPicker = ({
   isOpen = false,
   closer = () => void 0,
 }: MaterialPickerProps) => {
+  const { isAuthenticated } = useAuth0();
   const {
     data: textbooks,
     isSuccess,
@@ -38,7 +40,7 @@ const MaterialPicker = ({
     queryKey: ["textbooks"],
     queryFn: contentService.getAllTextbooks,
   });
-  const { data: progress } = useProgress();
+  const { data: progress } = useProgress(isAuthenticated);
   const navigate = useNavigate();
   const { saveProgress, selectedTextbookIds, setSelectedTextbookIds } =
     useContext(ProgressContext) as ProgressContextType;

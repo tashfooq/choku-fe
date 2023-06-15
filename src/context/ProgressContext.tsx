@@ -4,6 +4,7 @@ import { Chapter, Progress, ProgressDto, SubChapter, SubTopic } from "../types";
 import { useProgress } from "../common/queries";
 import * as immer from "immer";
 import { contentService } from "../services/ContentService";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export type ProgressContextType = {
   selectedTextbookIds: number[];
@@ -24,7 +25,8 @@ type ProgressProviderProps = {
 const ProgressContext = createContext<ProgressContextType | null>(null);
 
 export const ProgressProvider = ({ children }: ProgressProviderProps) => {
-  const { data: progress, isSuccess } = useProgress();
+  const { isAuthenticated } = useAuth0();
+  const { data: progress, isSuccess } = useProgress(isAuthenticated);
   const [selectedTextbookIds, setSelectedTextbookIds] = useState<number[]>([]);
   const [selectedChapters, setSelectedChapters] = useState<Chapter[]>([]);
   const [selectedSubChapters, setSelectedSubChapters] = useState<SubChapter[]>(
