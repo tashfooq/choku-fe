@@ -63,20 +63,22 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
     const chapterIds = selectedChapters.map((c) => c.id);
     const subChapterIds = selectedSubChapters.map((c) => c.id);
     const subTopicIds = selectedSubTopics.map((c) => c.id);
-    const modifiedProgress = immer.produce(progress, (draft: ProgressDto) => {
-      const chaptersIdsToBeAdded = chapterIds.filter(
-        (id) => !draft.chapterProgress.includes(id)
-      );
-      const subchapterIdsToBeAdded = subChapterIds.filter(
-        (id) => !draft.subchapterProgress.includes(id)
-      );
-      const subtopicIdsToBeAdded = subTopicIds.filter(
-        (id) => !draft.subtopicProgress.includes(id)
-      );
-      draft.chapterProgress.push(...chaptersIdsToBeAdded);
-      draft.subchapterProgress.push(...subchapterIdsToBeAdded);
-      draft.subtopicProgress.push(...subtopicIdsToBeAdded);
-    });
+    const modifiedProgress = progress
+      ? immer.produce(progress, (draft: ProgressDto) => {
+          const chaptersIdsToBeAdded = chapterIds.filter(
+            (id) => !draft.chapterProgress.includes(id)
+          );
+          const subchapterIdsToBeAdded = subChapterIds.filter(
+            (id) => !draft.subchapterProgress.includes(id)
+          );
+          const subtopicIdsToBeAdded = subTopicIds.filter(
+            (id) => !draft.subtopicProgress.includes(id)
+          );
+          draft.chapterProgress.push(...chaptersIdsToBeAdded);
+          draft.subchapterProgress.push(...subchapterIdsToBeAdded);
+          draft.subtopicProgress.push(...subtopicIdsToBeAdded);
+        })
+      : {};
     const { chapterProgress, subchapterProgress, subtopicProgress } =
       modifiedProgress as ProgressDto;
     const updatedProgress: Progress = {
@@ -85,6 +87,7 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
       subchapterProgress,
       subtopicProgress,
     };
+    console.log(updatedProgress);
     // use react query to update progress
     progressService.updateProgress(updatedProgress);
   };

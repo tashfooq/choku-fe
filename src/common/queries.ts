@@ -14,7 +14,7 @@ export const useChapter = (textbookId: number, isAuthenticated: boolean) =>
   useQuery<Chapter[]>({
     queryKey: ["chapter", textbookId],
     queryFn: () => contentService.getChapters(textbookId),
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !!textbookId,
   });
 
 export const useSubChapter = (chapterId: number, isAuthenticated: boolean) =>

@@ -63,6 +63,7 @@ const MaterialPicker = ({
   };
 
   const saveMaterials = () => {
+    console.log(selected);
     if (isModalView) {
       setSelectedTextbookIds(selected);
       saveProgress();

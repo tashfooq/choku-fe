@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, ComponentType } from "react";
 import {
   Container,
   Group,
@@ -7,6 +7,7 @@ import {
   Text,
   createStyles,
   px,
+  Center,
 } from "@mantine/core";
 import { contentService } from "../services/ContentService";
 import ProgressContext, {
@@ -27,6 +28,7 @@ import MaterialPicker from "./MaterialPicker";
 import { DataTable } from "mantine-datatable";
 import SubchapterTable from "./SubchapterTable";
 import { useChapter } from "../common/queries";
+import HeaderMenu from "./Header";
 
 const useStyles = createStyles((theme) => ({
   expandIcon: {
@@ -42,8 +44,6 @@ const useStyles = createStyles((theme) => ({
 
 const Tracker = () => {
   const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
-  const audience = process.env.REACT_APP_AUTH0_AUDIENCE;
-  console.log("isAuthenticated", isAuthenticated);
   const navigate = useNavigate();
   const { cx, classes } = useStyles();
 
@@ -76,14 +76,12 @@ const Tracker = () => {
     queryKey: ["progress"],
     queryFn: progressService.getProgress,
     onError(err: AxiosError) {
-      if (err.response?.status === 404) {
+      if (err?.response?.status === 404) {
         navigate("/picker");
       }
     },
     enabled: isAuthenticated,
   });
-
-  console.log(isAuthenticated && textbookSelectValue !== null);
 
   // wrap the entire table to render if chapter exists
   const { data: chapters, isLoading: isChaptersLoading } = useChapter(
@@ -113,77 +111,80 @@ const Tracker = () => {
   }
 
   return (
-    <Container size="xl" px="md">
-      <Group style={{ margin: 10 }} position="apart">
-        <Select
-          value={textbookSelectValue}
-          placeholder="Pick a resource"
-          onClick={getTextbooks}
-          onChange={setTextbookSelectValue}
-          data={textbooks.map(({ id, name }) => {
-            return { value: id, label: name };
-          })}
-        />
-        <div>
-          <Button
-            leftIcon={<IconBook2 />}
-            style={{ marginRight: 10 }}
-            onClick={() => setSettingsModalOpen(true)}
-          >
-            Update Tracker Material
-          </Button>
-          <Button leftIcon={<IconDeviceFloppy />} onClick={saveProgress}>
-            Save
-          </Button>
-        </div>
-      </Group>
+    <>
+      <Container size="xl" px="md">
+        <HeaderMenu />
+        <Group style={{ margin: 10 }} position="apart">
+          <Select
+            value={textbookSelectValue}
+            placeholder="Pick a resource"
+            onClick={getTextbooks}
+            onChange={setTextbookSelectValue}
+            data={textbooks.map(({ id, name }) => {
+              return { value: id, label: name };
+            })}
+          />
+          <div>
+            <Button
+              leftIcon={<IconBook2 />}
+              style={{ marginRight: 10 }}
+              onClick={() => setSettingsModalOpen(true)}
+            >
+              Update Tracker Material
+            </Button>
+            <Button leftIcon={<IconDeviceFloppy />} onClick={saveProgress}>
+              Save
+            </Button>
+          </div>
+        </Group>
 
-      {textbookSelectValue === null ? (
-        <Text>Choose a textbook to get started</Text>
-      ) : (
-        <DataTable
-          columns={[
-            {
-              accessor: "name",
-              title: "Name",
-              render: ({ id, name }) => (
-                <Group spacing="xs">
-                  <IconChevronRight
-                    size="0.9em"
-                    className={cx(classes.expandIcon, {
-                      [classes.expandIconRotated]:
-                        expandedRecordIds.includes(id),
-                    })}
-                  />
-                  <IconBrush size="0.9em" />
-                  <Text>{name}</Text>
-                </Group>
+        {textbookSelectValue === null ? (
+          <Text ml="sm">Choose a textbook to get started</Text>
+        ) : (
+          <DataTable
+            columns={[
+              {
+                accessor: "name",
+                title: "Name",
+                render: ({ id, name }) => (
+                  <Group spacing="xs">
+                    <IconChevronRight
+                      size="0.9em"
+                      className={cx(classes.expandIcon, {
+                        [classes.expandIconRotated]:
+                          expandedRecordIds.includes(id),
+                      })}
+                    />
+                    <IconBrush size="0.9em" />
+                    <Text>{name}</Text>
+                  </Group>
+                ),
+              },
+            ]}
+            records={chapters}
+            fetching={isChaptersLoading}
+            selectedRecords={selectedChapters}
+            onSelectedRecordsChange={setSelectedChapters}
+            rowExpansion={{
+              allowMultiple: false,
+              expanded: {
+                recordIds: expandedRecordIds,
+                onRecordIdsChange: setExpandedRecordIds,
+              },
+              content: ({ record, recordIndex }) => (
+                <SubchapterTable chapterId={record.id} />
               ),
-            },
-          ]}
-          records={chapters}
-          fetching={isChaptersLoading}
-          selectedRecords={selectedChapters}
-          onSelectedRecordsChange={setSelectedChapters}
-          rowExpansion={{
-            allowMultiple: false,
-            expanded: {
-              recordIds: expandedRecordIds,
-              onRecordIdsChange: setExpandedRecordIds,
-            },
-            content: ({ record, recordIndex }) => (
-              <SubchapterTable chapterId={record.id} />
-            ),
-          }}
-        />
-      )}
+            }}
+          />
+        )}
 
-      <MaterialPicker
-        isModalView={true}
-        isOpen={settingsModalOpen}
-        closer={setSettingsModalOpen}
-      />
-    </Container>
+        <MaterialPicker
+          isModalView={true}
+          isOpen={settingsModalOpen}
+          closer={setSettingsModalOpen}
+        />
+      </Container>
+    </>
   );
 };
 
