@@ -16,6 +16,7 @@ export type ProgressContextType = {
   selectedSubTopics: SubTopic[];
   setSelectedSubTopics: (subTopics: SubTopic[]) => void;
   saveProgress: () => void;
+  saveProgressFromPicker: (textbookIdsFromPicker?: number[]) => void;
 };
 
 type ProgressProviderProps = {
@@ -59,7 +60,9 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
     setSelectedSubTopics(completedSubTopics);
   };
 
-  const saveProgress = () => {
+  const formatProgressForSave = (
+    textbookIdsFromPicker?: number[]
+  ): Progress => {
     const chapterIds = selectedChapters.map((c) => c.id);
     const subChapterIds = selectedSubChapters.map((c) => c.id);
     const subTopicIds = selectedSubTopics.map((c) => c.id);
@@ -81,12 +84,30 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
       : {};
     const { chapterProgress, subchapterProgress, subtopicProgress } =
       modifiedProgress as ProgressDto;
-    const updatedProgress: Progress = {
-      selectedTextbookIds,
-      chapterProgress,
-      subchapterProgress,
-      subtopicProgress,
-    };
+    const updatedProgress: Progress = textbookIdsFromPicker
+      ? {
+          selectedTextbookIds: textbookIdsFromPicker,
+          chapterProgress,
+          subchapterProgress,
+          subtopicProgress,
+        }
+      : {
+          selectedTextbookIds,
+          chapterProgress,
+          subchapterProgress,
+          subtopicProgress,
+        };
+    return updatedProgress;
+  };
+
+  const saveProgress = () => {
+    const updatedProgress = formatProgressForSave();
+    // use react query to update progress
+    progressService.updateProgress(updatedProgress);
+  };
+
+  const saveProgressFromPicker = (textbookIdsFromPicker?: number[]) => {
+    const updatedProgress = formatProgressForSave(textbookIdsFromPicker);
     console.log(updatedProgress);
     // use react query to update progress
     progressService.updateProgress(updatedProgress);
@@ -110,6 +131,7 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
         selectedSubTopics,
         setSelectedSubTopics,
         saveProgress,
+        saveProgressFromPicker,
       }}
     >
       {children}

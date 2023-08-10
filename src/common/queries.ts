@@ -10,11 +10,11 @@ export const useProgress = (isAuthenticated: boolean) =>
     enabled: isAuthenticated,
   });
 
-export const useChapter = (textbookId: number, isAuthenticated: boolean) =>
+export const useChapter = (textbookId: number, isEnabled: boolean) =>
   useQuery<Chapter[]>({
     queryKey: ["chapter", textbookId],
     queryFn: () => contentService.getChapters(textbookId),
-    enabled: isAuthenticated && !!textbookId,
+    enabled: isEnabled,
   });
 
 export const useSubChapter = (chapterId: number, isAuthenticated: boolean) =>

@@ -42,10 +42,12 @@ const MaterialPicker = ({
   });
   const { data: progress } = useProgress(isAuthenticated);
   const navigate = useNavigate();
-  const { saveProgress, selectedTextbookIds, setSelectedTextbookIds } =
-    useContext(ProgressContext) as ProgressContextType;
+  const { saveProgressFromPicker, setSelectedTextbookIds } = useContext(
+    ProgressContext
+  ) as ProgressContextType;
   const [selected, setSelected] = useState<any[]>([]);
 
+  // maybe move this to the onSuccess portion of the react query
   useEffect(() => {
     if (progress && progress.selectedTextbookIds.length > 0) {
       setSelected(progress.selectedTextbookIds);
@@ -63,16 +65,23 @@ const MaterialPicker = ({
   };
 
   const saveMaterials = () => {
-    console.log(selected);
     if (isModalView) {
-      setSelectedTextbookIds(selected);
-      saveProgress();
-      closer(false);
+      try {
+        setSelectedTextbookIds(selected);
+        saveProgressFromPicker(selected);
+        closer(false);
+      } catch (e) {
+        console.log("failed to save");
+      }
       return;
     }
-    setSelectedTextbookIds(selected);
-    saveProgress();
-    navigate("/tracker");
+    try {
+      setSelectedTextbookIds(selected);
+      saveProgressFromPicker(selected);
+      navigate("/tracker");
+    } catch (e) {
+      console.log("failed to save");
+    }
   };
 
   const nonModalView = (pos: GroupPosition) => {

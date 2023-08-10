@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, ComponentType } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import {
   Container,
   Group,
@@ -7,7 +7,6 @@ import {
   Text,
   createStyles,
   px,
-  Center,
 } from "@mantine/core";
 import { contentService } from "../services/ContentService";
 import ProgressContext, {
@@ -29,6 +28,7 @@ import { DataTable } from "mantine-datatable";
 import SubchapterTable from "./SubchapterTable";
 import { useChapter } from "../common/queries";
 import HeaderMenu from "./Header";
+import { Item, ProgressDto } from "../types";
 
 const useStyles = createStyles((theme) => ({
   expandIcon: {
@@ -58,25 +58,42 @@ const Tracker = () => {
     })();
   }, [isLoading, getAccessTokenSilently]);
 
-  const [textbooks, setTextbooks] = useState([]);
+  const {
+    saveProgress,
+    selectedTextbookIds,
+    selectedChapters,
+    setSelectedChapters,
+  } = useContext(ProgressContext) as ProgressContextType;
+  const { data: allTextbooks } = useQuery<Item[]>({
+    queryKey: ["textbooks"],
+    queryFn: contentService.getAllTextbooks,
+  });
+  // const [textbooks, setTextbooks] = useState([]);
+  const textbooks = useMemo(() => {
+    return allTextbooks
+      ? allTextbooks.filter(({ id }) => selectedTextbookIds.includes(id))
+      : [];
+  }, [allTextbooks, selectedTextbookIds]);
+
   const [textbookSelectValue, setTextbookSelectValue] = useState<string | null>(
     null
   );
   const [expandedRecordIds, setExpandedRecordIds] = useState<number[]>([]);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
-  const {
-    saveProgress,
-    setSelectedTextbookIds,
-    selectedChapters,
-    setSelectedChapters,
-  } = useContext(ProgressContext) as ProgressContextType;
 
   // this needs using useProgress hook and then navigating to picker if no progress
-  const { data: progress, isSuccess } = useQuery({
+  // we already make a call to go get progress in the progress context which likely happens before this component is initialized
+  // thinking about using the data there to trigger a navigate to the picker
+  const { data: progress } = useQuery({
     queryKey: ["progress"],
     queryFn: progressService.getProgress,
-    onError(err: AxiosError) {
+    onError: (err: AxiosError) => {
       if (err?.response?.status === 404) {
+        navigate("/picker");
+      }
+    },
+    onSuccess: ({ selectedTextbookIds }: ProgressDto) => {
+      if (selectedTextbookIds && selectedTextbookIds.length === 0) {
         navigate("/picker");
       }
     },
@@ -86,25 +103,8 @@ const Tracker = () => {
   // wrap the entire table to render if chapter exists
   const { data: chapters, isLoading: isChaptersLoading } = useChapter(
     Number(textbookSelectValue),
-    isAuthenticated || textbookSelectValue !== null
+    isAuthenticated && textbookSelectValue !== null
   );
-
-  const getTextbooks = async () => {
-    // this needs to be updated to look at selectedTextbookIds
-    const allTextbooks = await contentService.getAllTextbooks();
-    if (isSuccess) {
-      if (!!allTextbooks) {
-        setTextbooks(
-          allTextbooks.filter(({ id }: any) =>
-            progress.selectedTextbookIds.includes(id)
-          )
-        );
-      }
-      setSelectedTextbookIds(progress.selectedTextbookIds);
-      return;
-    }
-    setSelectedTextbookIds([]);
-  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -118,10 +118,9 @@ const Tracker = () => {
           <Select
             value={textbookSelectValue}
             placeholder="Pick a resource"
-            onClick={getTextbooks}
             onChange={setTextbookSelectValue}
             data={textbooks.map(({ id, name }) => {
-              return { value: id, label: name };
+              return { value: id.toString(), label: name };
             })}
           />
           <div>
