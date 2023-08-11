@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useEffect, useRef, useState } from "react";
+import { createContext, ReactNode, useState } from "react";
 import { progressService } from "../services/ProgressService";
 import { Chapter, Progress, ProgressDto, SubChapter, SubTopic } from "../types";
 import { useProgress } from "../common/queries";
@@ -27,21 +27,23 @@ const ProgressContext = createContext<ProgressContextType | null>(null);
 
 export const ProgressProvider = ({ children }: ProgressProviderProps) => {
   const { isAuthenticated } = useAuth0();
-  const { data: progress, isSuccess } = useProgress(isAuthenticated);
+
   const [selectedTextbookIds, setSelectedTextbookIds] = useState<number[]>([]);
   const [selectedChapters, setSelectedChapters] = useState<Chapter[]>([]);
   const [selectedSubChapters, setSelectedSubChapters] = useState<SubChapter[]>(
     []
   );
   const [selectedSubTopics, setSelectedSubTopics] = useState<SubTopic[]>([]);
-  // const [progress, setProgress] = useState<Progress | null>(null);
 
-  const persistProgress = async (data: ProgressDto) => {
-    const { chapterProgress, subchapterProgress, subtopicProgress } = data;
-
-    console.log(chapterProgress);
-    console.log(subchapterProgress);
-    console.log(subtopicProgress);
+  // this needs to be renamed to initializeProgress
+  // also we need to set selectedTextbookIds here instead of in the picker
+  const initializeProgress = async (data: ProgressDto) => {
+    const {
+      selectedTextbookIds,
+      chapterProgress,
+      subchapterProgress,
+      subtopicProgress,
+    } = data;
 
     const completedChapters = await contentService.getChaptersByIds(
       chapterProgress
@@ -55,10 +57,13 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
       subtopicProgress
     );
 
+    setSelectedTextbookIds(selectedTextbookIds);
     setSelectedChapters(completedChapters);
     setSelectedSubChapters(completedSubChapters);
     setSelectedSubTopics(completedSubTopics);
   };
+
+  const { data: progress } = useProgress(isAuthenticated, initializeProgress);
 
   const formatProgressForSave = (
     textbookIdsFromPicker?: number[]
@@ -102,22 +107,21 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
 
   const saveProgress = () => {
     const updatedProgress = formatProgressForSave();
-    // use react query to update progress
     progressService.updateProgress(updatedProgress);
   };
 
   const saveProgressFromPicker = (textbookIdsFromPicker?: number[]) => {
     const updatedProgress = formatProgressForSave(textbookIdsFromPicker);
-    console.log(updatedProgress);
-    // use react query to update progress
     progressService.updateProgress(updatedProgress);
   };
 
-  useEffect(() => {
-    if (progress && isSuccess) {
-      persistProgress(progress);
-    }
-  }, [progress, isSuccess]);
+  // instead of initializing here, maybe do it onSuccess of the query
+  // commenting this out here to check if this actually works
+  // useEffect(() => {
+  //   if (progress && isSuccess) {
+  //     initializeProgress(progress);
+  //   }
+  // }, [progress, isSuccess]);
 
   return (
     <ProgressContext.Provider

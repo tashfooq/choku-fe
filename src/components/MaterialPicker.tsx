@@ -17,8 +17,6 @@ import ProgressContext, {
 } from "../context/ProgressContext";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { useProgress } from "../common/queries";
-import { useAuth0 } from "@auth0/auth0-react";
 
 type MaterialPickerProps = {
   isModalView: boolean;
@@ -31,7 +29,6 @@ const MaterialPicker = ({
   isOpen = false,
   closer = () => void 0,
 }: MaterialPickerProps) => {
-  const { isAuthenticated } = useAuth0();
   const {
     data: textbooks,
     isSuccess,
@@ -40,22 +37,20 @@ const MaterialPicker = ({
     queryKey: ["textbooks"],
     queryFn: contentService.getAllTextbooks,
   });
-  const { data: progress } = useProgress(isAuthenticated);
   const navigate = useNavigate();
-  const { saveProgressFromPicker, setSelectedTextbookIds } = useContext(
-    ProgressContext
-  ) as ProgressContextType;
+  const {
+    saveProgressFromPicker,
+    setSelectedTextbookIds,
+    selectedTextbookIds,
+  } = useContext(ProgressContext) as ProgressContextType;
   const [selected, setSelected] = useState<any[]>([]);
 
-  // maybe move this to the onSuccess portion of the react query
   useEffect(() => {
-    if (progress && progress.selectedTextbookIds.length > 0) {
-      setSelected(progress.selectedTextbookIds);
-      setSelectedTextbookIds(progress.selectedTextbookIds);
-    }
-  }, [progress, setSelected, setSelectedTextbookIds]);
+    setSelected(selectedTextbookIds);
+  }, [selectedTextbookIds]);
 
   const formatForMultiSelect = (): (string | SelectItem)[] => {
+    // add a check to see if textbooks is empty
     if (!isLoading && isSuccess) {
       return textbooks?.map(({ id, name }: SelectItem) => {
         return { value: id, label: name };
@@ -65,23 +60,34 @@ const MaterialPicker = ({
   };
 
   const saveMaterials = () => {
-    if (isModalView) {
-      try {
-        setSelectedTextbookIds(selected);
-        saveProgressFromPicker(selected);
-        closer(false);
-      } catch (e) {
-        console.log("failed to save");
-      }
-      return;
-    }
     try {
       setSelectedTextbookIds(selected);
       saveProgressFromPicker(selected);
-      navigate("/tracker");
+      if (isModalView) {
+        closer(false);
+      } else {
+        navigate("/tracker");
+      }
     } catch (e) {
       console.log("failed to save");
     }
+    // if (isModalView) {
+    //   try {
+    //     setSelectedTextbookIds(selected);
+    //     saveProgressFromPicker(selected);
+    //     closer(false);
+    //   } catch (e) {
+    //     console.log("failed to save");
+    //   }
+    //   return;
+    // }
+    // try {
+    //   setSelectedTextbookIds(selected);
+    //   saveProgressFromPicker(selected);
+    //   navigate("/tracker");
+    // } catch (e) {
+    //   console.log("failed to save");
+    // }
   };
 
   const nonModalView = (pos: GroupPosition) => {
