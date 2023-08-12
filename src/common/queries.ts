@@ -3,18 +3,22 @@ import { contentService } from "../services/ContentService";
 import { progressService } from "../services/ProgressService";
 import { Chapter, ProgressDto, SubChapter, SubTopic } from "../types";
 
-export const useProgress = (isAuthenticated: boolean) =>
+export const useProgress = (
+  isAuthenticated: boolean,
+  onSuccessHandler?: (data: ProgressDto) => void
+) =>
   useQuery<ProgressDto>({
     queryKey: ["progress"],
     queryFn: progressService.getProgress,
     enabled: isAuthenticated,
+    ...(onSuccessHandler && { onSuccess: onSuccessHandler }),
   });
 
-export const useChapter = (textbookId: number, isAuthenticated: boolean) =>
+export const useChapter = (textbookId: number, isEnabled: boolean) =>
   useQuery<Chapter[]>({
     queryKey: ["chapter", textbookId],
     queryFn: () => contentService.getChapters(textbookId),
-    enabled: isAuthenticated,
+    enabled: isEnabled,
   });
 
 export const useSubChapter = (chapterId: number, isAuthenticated: boolean) =>

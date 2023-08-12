@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useEffect, useRef, useState } from "react";
+import { createContext, ReactNode, useState } from "react";
 import { progressService } from "../services/ProgressService";
 import { Chapter, Progress, ProgressDto, SubChapter, SubTopic } from "../types";
 import { useProgress } from "../common/queries";
@@ -16,6 +16,7 @@ export type ProgressContextType = {
   selectedSubTopics: SubTopic[];
   setSelectedSubTopics: (subTopics: SubTopic[]) => void;
   saveProgress: () => void;
+  saveProgressFromPicker: (textbookIdsFromPicker?: number[]) => void;
 };
 
 type ProgressProviderProps = {
@@ -26,21 +27,23 @@ const ProgressContext = createContext<ProgressContextType | null>(null);
 
 export const ProgressProvider = ({ children }: ProgressProviderProps) => {
   const { isAuthenticated } = useAuth0();
-  const { data: progress, isSuccess } = useProgress(isAuthenticated);
+
   const [selectedTextbookIds, setSelectedTextbookIds] = useState<number[]>([]);
   const [selectedChapters, setSelectedChapters] = useState<Chapter[]>([]);
   const [selectedSubChapters, setSelectedSubChapters] = useState<SubChapter[]>(
     []
   );
   const [selectedSubTopics, setSelectedSubTopics] = useState<SubTopic[]>([]);
-  // const [progress, setProgress] = useState<Progress | null>(null);
 
-  const persistProgress = async (data: ProgressDto) => {
-    const { chapterProgress, subchapterProgress, subtopicProgress } = data;
-
-    console.log(chapterProgress);
-    console.log(subchapterProgress);
-    console.log(subtopicProgress);
+  // this needs to be renamed to initializeProgress
+  // also we need to set selectedTextbookIds here instead of in the picker
+  const initializeProgress = async (data: ProgressDto) => {
+    const {
+      selectedTextbookIds,
+      chapterProgress,
+      subchapterProgress,
+      subtopicProgress,
+    } = data;
 
     const completedChapters = await contentService.getChaptersByIds(
       chapterProgress
@@ -54,46 +57,71 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
       subtopicProgress
     );
 
+    setSelectedTextbookIds(selectedTextbookIds);
     setSelectedChapters(completedChapters);
     setSelectedSubChapters(completedSubChapters);
     setSelectedSubTopics(completedSubTopics);
   };
 
-  const saveProgress = () => {
+  const { data: progress } = useProgress(isAuthenticated, initializeProgress);
+
+  const formatProgressForSave = (
+    textbookIdsFromPicker?: number[]
+  ): Progress => {
     const chapterIds = selectedChapters.map((c) => c.id);
     const subChapterIds = selectedSubChapters.map((c) => c.id);
     const subTopicIds = selectedSubTopics.map((c) => c.id);
-    const modifiedProgress = immer.produce(progress, (draft: ProgressDto) => {
-      const chaptersIdsToBeAdded = chapterIds.filter(
-        (id) => !draft.chapterProgress.includes(id)
-      );
-      const subchapterIdsToBeAdded = subChapterIds.filter(
-        (id) => !draft.subchapterProgress.includes(id)
-      );
-      const subtopicIdsToBeAdded = subTopicIds.filter(
-        (id) => !draft.subtopicProgress.includes(id)
-      );
-      draft.chapterProgress.push(...chaptersIdsToBeAdded);
-      draft.subchapterProgress.push(...subchapterIdsToBeAdded);
-      draft.subtopicProgress.push(...subtopicIdsToBeAdded);
-    });
+    const modifiedProgress = progress
+      ? immer.produce(progress, (draft: ProgressDto) => {
+          const chaptersIdsToBeAdded = chapterIds.filter(
+            (id) => !draft.chapterProgress.includes(id)
+          );
+          const subchapterIdsToBeAdded = subChapterIds.filter(
+            (id) => !draft.subchapterProgress.includes(id)
+          );
+          const subtopicIdsToBeAdded = subTopicIds.filter(
+            (id) => !draft.subtopicProgress.includes(id)
+          );
+          draft.chapterProgress.push(...chaptersIdsToBeAdded);
+          draft.subchapterProgress.push(...subchapterIdsToBeAdded);
+          draft.subtopicProgress.push(...subtopicIdsToBeAdded);
+        })
+      : {};
     const { chapterProgress, subchapterProgress, subtopicProgress } =
       modifiedProgress as ProgressDto;
-    const updatedProgress: Progress = {
-      selectedTextbookIds,
-      chapterProgress,
-      subchapterProgress,
-      subtopicProgress,
-    };
-    // use react query to update progress
+    const updatedProgress: Progress = textbookIdsFromPicker
+      ? {
+          selectedTextbookIds: textbookIdsFromPicker,
+          chapterProgress,
+          subchapterProgress,
+          subtopicProgress,
+        }
+      : {
+          selectedTextbookIds,
+          chapterProgress,
+          subchapterProgress,
+          subtopicProgress,
+        };
+    return updatedProgress;
+  };
+
+  const saveProgress = () => {
+    const updatedProgress = formatProgressForSave();
     progressService.updateProgress(updatedProgress);
   };
 
-  useEffect(() => {
-    if (progress && isSuccess) {
-      persistProgress(progress);
-    }
-  }, [progress, isSuccess]);
+  const saveProgressFromPicker = (textbookIdsFromPicker?: number[]) => {
+    const updatedProgress = formatProgressForSave(textbookIdsFromPicker);
+    progressService.updateProgress(updatedProgress);
+  };
+
+  // instead of initializing here, maybe do it onSuccess of the query
+  // commenting this out here to check if this actually works
+  // useEffect(() => {
+  //   if (progress && isSuccess) {
+  //     initializeProgress(progress);
+  //   }
+  // }, [progress, isSuccess]);
 
   return (
     <ProgressContext.Provider
@@ -107,6 +135,7 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
         selectedSubTopics,
         setSelectedSubTopics,
         saveProgress,
+        saveProgressFromPicker,
       }}
     >
       {children}
