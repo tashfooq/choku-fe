@@ -81,7 +81,6 @@ const Tracker = () => {
   const [expandedRecordIds, setExpandedRecordIds] = useState<number[]>([]);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
-  // this needs using useProgress hook and then navigating to picker if no progress
   // we already make a call to go get progress in the progress context which likely happens before this component is initialized
   // thinking about using the data there to trigger a navigate to the picker
   const { data: progress } = useQuery({
