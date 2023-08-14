@@ -153,8 +153,9 @@ const HeaderMenu = () => {
           />
 
           <Group position="center" grow pb="xl" px="md">
-            <Button variant="default">Log in</Button>
-            <Button>Sign up</Button>
+            {/* <Button variant="default">Log in</Button>
+            <Button>Sign up</Button> */}
+            <AuthButtons />
           </Group>
         </ScrollArea>
       </Drawer>

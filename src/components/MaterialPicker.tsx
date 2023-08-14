@@ -69,25 +69,8 @@ const MaterialPicker = ({
         navigate("/tracker");
       }
     } catch (e) {
-      console.log("failed to save");
+      console.error("Failed to save");
     }
-    // if (isModalView) {
-    //   try {
-    //     setSelectedTextbookIds(selected);
-    //     saveProgressFromPicker(selected);
-    //     closer(false);
-    //   } catch (e) {
-    //     console.log("failed to save");
-    //   }
-    //   return;
-    // }
-    // try {
-    //   setSelectedTextbookIds(selected);
-    //   saveProgressFromPicker(selected);
-    //   navigate("/tracker");
-    // } catch (e) {
-    //   console.log("failed to save");
-    // }
   };
 
   const nonModalView = (pos: GroupPosition) => {
