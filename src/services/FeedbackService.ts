@@ -2,9 +2,12 @@ import axios from "axios";
 import { apiRoutes } from "../common/constants";
 
 const { feedback } = apiRoutes;
-const sendFeedback = async (feedbackMsg: string) => {
-  const feedbackObj = { message: feedbackMsg };
-  const response = await axios.post(`${feedback}/send`, feedbackObj, {
+const sendFeedback = async (feedbackPayload: {
+  name: string;
+  email: string;
+  feedback: string;
+}) => {
+  const response = await axios.post(`${feedback}/send`, feedbackPayload, {
     headers: {
       Authorization: "Bearer " + localStorage.getItem("token"),
     },

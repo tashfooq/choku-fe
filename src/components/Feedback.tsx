@@ -11,38 +11,49 @@ import {
 import { feedbackService } from "../services/FeedbackService";
 
 const Feedback = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [feedback, setFeedback] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const submitFeedback = async () => {
     setIsSubmitted(true);
-    await feedbackService.sendFeedback(feedback);
+    await feedbackService.sendFeedback({ name, email, feedback });
   };
 
   return (
     <Center>
       <Stack>
-        <form onSubmit={submitFeedback}>
-          <Box w={600}>
-            <Text>Give us Feedback!</Text>
-            <TextInput disabled={isSubmitted} required label="Name"></TextInput>
-            <TextInput
-              disabled={isSubmitted}
-              required
-              label="Email"
-            ></TextInput>
-            <Textarea
-              placeholder="Your feedback is important to us!"
-              value={feedback}
-              onChange={(e) => setFeedback(e.currentTarget.value)}
-              disabled={isSubmitted}
-              required
-            ></Textarea>
-            <Button mt={10} type="submit" disabled={isSubmitted}>
-              {isSubmitted ? "Thank you for your feedback!" : "Submit"}
-            </Button>
-          </Box>
-        </form>
+        <Box w={600}>
+          <Text>Give us Feedback!</Text>
+          <TextInput
+            value={name}
+            onChange={(e) => setName(e.currentTarget.value)}
+            disabled={isSubmitted}
+            required
+            label="Name"
+          ></TextInput>
+          <TextInput
+            mt={10}
+            value={email}
+            onChange={(e) => setEmail(e.currentTarget.value)}
+            disabled={isSubmitted}
+            required
+            label="Email"
+          ></TextInput>
+          <Textarea
+            mt={10}
+            label="Feedback"
+            placeholder="Your feedback is important to us!"
+            value={feedback}
+            onChange={(e) => setFeedback(e.currentTarget.value)}
+            disabled={isSubmitted}
+            required
+          ></Textarea>
+          <Button mt={10} onClick={submitFeedback} disabled={isSubmitted}>
+            {isSubmitted ? "Thank you for your feedback!" : "Submit"}
+          </Button>
+        </Box>
       </Stack>
     </Center>
   );
