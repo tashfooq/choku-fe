@@ -1,9 +1,9 @@
+import React from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@mantine/core";
-import React from "react";
 
 const AuthButtons = () => {
-  const { isAuthenticated, loginWithRedirect } = useAuth0();
+  const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
   return (
     <>
       {!isAuthenticated && (
@@ -14,7 +14,16 @@ const AuthButtons = () => {
           <Button>Sign up</Button>
         </>
       )}
-      {isAuthenticated && <Button variant="default">Log out</Button>}
+      {isAuthenticated && (
+        <Button
+          variant="default"
+          onClick={() =>
+            logout({ logoutParams: { returnTo: window.location.origin } })
+          }
+        >
+          Log out
+        </Button>
+      )}
     </>
   );
 };

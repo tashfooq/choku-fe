@@ -16,6 +16,8 @@ export type ProgressContextType = {
   setSelectedSubTopics: (subTopics: SubTopic[]) => void;
   saveProgress: () => void;
   saveProgressFromPicker: (textbookIdsFromPicker?: number[]) => void;
+  progress: Progress | undefined;
+  progressError: unknown;
 };
 
 type ProgressProviderProps = {
@@ -61,7 +63,10 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
     setSelectedSubTopics(completedSubTopics);
   };
 
-  const { data: progress } = useProgress(isAuthenticated, initializeProgress);
+  const { data: progress, error: progressError } = useProgress(
+    isAuthenticated,
+    initializeProgress
+  );
 
   const formatProgressForSave = (
     textbookIdsFromPicker?: number[]
@@ -108,6 +113,8 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
         setSelectedSubTopics,
         saveProgress,
         saveProgressFromPicker,
+        progress,
+        progressError,
       }}
     >
       {children}

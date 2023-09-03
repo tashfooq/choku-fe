@@ -109,14 +109,14 @@ const Banner = () => {
             variant="default"
             color="gray"
           >
-            Sign Up
+            Learn more
           </Button>
           <Button
             onClick={() => loginWithRedirect()}
             className={classes.control}
             size="lg"
           >
-            Login
+            Login or Sign Up
           </Button>
         </div>
       </div>

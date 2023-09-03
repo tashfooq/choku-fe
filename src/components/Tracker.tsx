@@ -63,12 +63,32 @@ const Tracker = () => {
     selectedTextbookIds,
     selectedChapters,
     setSelectedChapters,
+    progress,
+    progressError,
   } = useContext(ProgressContext) as ProgressContextType;
   const { data: allTextbooks } = useQuery<Item[]>({
     queryKey: ["textbooks"],
     queryFn: contentService.getAllTextbooks,
   });
-  // const [textbooks, setTextbooks] = useState([]);
+
+  useEffect(() => {
+    if (progress) {
+      // looking at progress.selectedTextbookIds instead of selectedTextbookIds because the latter is not updated yet
+      if (
+        progress.selectedTextbookIds &&
+        progress.selectedTextbookIds.length === 0
+      ) {
+        navigate("/picker");
+      }
+    }
+    if (progressError && progressError instanceof AxiosError) {
+      if (progressError?.response?.status === 404) {
+        console.log("progressError", progressError);
+        navigate("/picker");
+      }
+    }
+  }, [progress, progressError, selectedTextbookIds, navigate]);
+
   const textbooks = useMemo(() => {
     return allTextbooks
       ? allTextbooks.filter(({ id }) => selectedTextbookIds.includes(id))
@@ -80,24 +100,6 @@ const Tracker = () => {
   );
   const [expandedRecordIds, setExpandedRecordIds] = useState<number[]>([]);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
-
-  // we already make a call to go get progress in the progress context which likely happens before this component is initialized
-  // thinking about using the data there to trigger a navigate to the picker
-  const { data: progress } = useQuery({
-    queryKey: ["progress"],
-    queryFn: progressService.getProgress,
-    onError: (err: AxiosError) => {
-      if (err?.response?.status === 404) {
-        navigate("/picker");
-      }
-    },
-    onSuccess: ({ selectedTextbookIds }: ProgressDto) => {
-      if (selectedTextbookIds && selectedTextbookIds.length === 0) {
-        navigate("/picker");
-      }
-    },
-    enabled: isAuthenticated,
-  });
 
   // wrap the entire table to render if chapter exists
   const { data: chapters, isLoading: isChaptersLoading } = useChapter(
