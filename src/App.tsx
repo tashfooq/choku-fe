@@ -6,6 +6,9 @@ import MaterialPicker from "./components/MaterialPicker";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ProgressProvider } from "./context/ProgressContext";
 import { AuthenticationGuard } from "./components/AuthGuard";
+import { AppShell } from "@mantine/core";
+import HeaderMenu from "./components/Header";
+import { useLocation } from "react-router-dom";
 
 const queryClient = new QueryClient();
 
@@ -14,20 +17,27 @@ function App() {
     document.title = "Choku | Progress Tracker";
   }, []);
 
+  const { pathname } = useLocation();
+
   return (
     <QueryClientProvider client={queryClient}>
       <ProgressProvider>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route
-            path="/tracker"
-            element={<AuthenticationGuard component={Tracker} />}
-          />
-          <Route
-            path="/picker"
-            element={<MaterialPicker isModalView={false} />}
-          />
-        </Routes>
+        <AppShell
+          header={<HeaderMenu />}
+          hidden={!["/tracker", "/picker"].includes(pathname)}
+        >
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route
+              path="/tracker"
+              element={<AuthenticationGuard component={Tracker} />}
+            />
+            <Route
+              path="/picker"
+              element={<MaterialPicker isModalView={false} />}
+            />
+          </Routes>
+        </AppShell>
       </ProgressProvider>
     </QueryClientProvider>
   );

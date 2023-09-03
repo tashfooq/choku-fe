@@ -2,7 +2,6 @@ import {
   createStyles,
   Header,
   Group,
-  Button,
   Divider,
   Box,
   Burger,
@@ -12,7 +11,6 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import AuthButtons from "./AuthButtons";
-import { ComponentType } from "react";
 
 const useStyles = createStyles((theme) => ({
   link: {
@@ -109,8 +107,6 @@ const HeaderMenu = () => {
           </Group>
 
           <Group className={classes.hiddenMobile}>
-            {/* <Button variant="default">Log in</Button>
-            <Button>Sign up</Button> */}
             <AuthButtons />
           </Group>
 
@@ -153,8 +149,6 @@ const HeaderMenu = () => {
           />
 
           <Group position="center" grow pb="xl" px="md">
-            {/* <Button variant="default">Log in</Button>
-            <Button>Sign up</Button> */}
             <AuthButtons />
           </Group>
         </ScrollArea>

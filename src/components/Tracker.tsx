@@ -114,7 +114,6 @@ const Tracker = () => {
   return (
     <>
       <Container size="xl" px="md">
-        <HeaderMenu />
         <Group style={{ margin: 10 }} position="apart">
           <Select
             value={textbookSelectValue}
