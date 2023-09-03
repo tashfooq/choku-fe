@@ -8,9 +8,11 @@ import {
   Drawer,
   ScrollArea,
   rem,
+  Anchor,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import AuthButtons from "./AuthButtons";
+import { useNavigate } from "react-router-dom";
 
 const useStyles = createStyles((theme) => ({
   link: {
@@ -85,6 +87,7 @@ const HeaderMenu = () => {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
   const { classes, theme } = useStyles();
+  const navigate = useNavigate();
 
   return (
     <Box pb={40}>
@@ -95,15 +98,24 @@ const HeaderMenu = () => {
             spacing={0}
             className={classes.hiddenMobile}
           >
-            <a href="#" className={classes.link}>
-              Home
-            </a>
-            <a href="#" className={classes.link}>
+            <Anchor
+              onClick={() => navigate("/dashboard")}
+              className={classes.link}
+            >
+              Dashboard
+            </Anchor>
+            <Anchor
+              onClick={() => navigate("/tracker")}
+              className={classes.link}
+            >
               Tracker
-            </a>
-            <a href="#" className={classes.link}>
+            </Anchor>
+            <Anchor
+              onClick={() => navigate("/feedback")}
+              className={classes.link}
+            >
               Feedback
-            </a>
+            </Anchor>
           </Group>
 
           <Group className={classes.hiddenMobile}>
@@ -133,15 +145,21 @@ const HeaderMenu = () => {
             color={theme.colorScheme === "dark" ? "dark.5" : "gray.1"}
           />
 
-          <a href="#" className={classes.link}>
-            Home
-          </a>
-          <a href="#" className={classes.link}>
-            Learn
-          </a>
-          <a href="#" className={classes.link}>
-            Academy
-          </a>
+          <Anchor
+            onClick={() => navigate("/dashboard")}
+            className={classes.link}
+          >
+            Dashboard
+          </Anchor>
+          <Anchor onClick={() => navigate("/tracker")} className={classes.link}>
+            Tracker
+          </Anchor>
+          <Anchor
+            onClick={() => navigate("/feedback")}
+            className={classes.link}
+          >
+            Feedback
+          </Anchor>
 
           <Divider
             my="sm"

@@ -11,4 +11,5 @@ export const apiRoutes = {
   auth: `${baseUrl}/auth`,
   content: `${baseUrl}/content`,
   progress: `${baseUrl}/progress`,
+  feedback: `${baseUrl}/feedback`,
 };
