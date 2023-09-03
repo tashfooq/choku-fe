@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
 import Tracker from "./components/Tracker";
 import MaterialPicker from "./components/MaterialPicker";
@@ -9,6 +9,8 @@ import { AuthenticationGuard } from "./components/AuthGuard";
 import { AppShell } from "@mantine/core";
 import HeaderMenu from "./components/Header";
 import { useLocation } from "react-router-dom";
+import Feedback from "./components/Feedback";
+import Dashboard from "./components/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -24,10 +26,11 @@ function App() {
       <ProgressProvider>
         <AppShell
           header={<HeaderMenu />}
-          hidden={!["/tracker", "/picker"].includes(pathname)}
+          hidden={!["/tracker", "/picker", "/feedback"].includes(pathname)}
         >
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route
               path="/tracker"
               element={<AuthenticationGuard component={Tracker} />}
@@ -35,6 +38,12 @@ function App() {
             <Route
               path="/picker"
               element={<MaterialPicker isModalView={false} />}
+            />
+            <Route
+              path="/feedback"
+              element={
+                <AuthenticationGuard component={Feedback}></AuthenticationGuard>
+              }
             />
           </Routes>
         </AppShell>
