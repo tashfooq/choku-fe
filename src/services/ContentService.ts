@@ -13,6 +13,18 @@ const getAllTextbooks = async () => {
   return response.data || [];
 };
 
+const getTextbooksByIds = async (textbookIds: number[]) => {
+  const response = await axios.get(`${content}/textbooks`, {
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token"),
+    },
+    params: {
+      ids: textbookIds,
+    },
+  });
+  return response.data.textbooks || [];
+};
+
 const getChapters = async (textbookId: number) => {
   const response = await axios.get(
     `${content}/textbooks/${textbookId}/chapters`,
@@ -82,6 +94,7 @@ const getSubTopicsByIds = async (subtopicIds: number[]) => {
 
 export const contentService = {
   getAllTextbooks,
+  getTextbooksByIds,
   getChapters,
   getSubChapters,
   getSubtopics: getSubTopics,
