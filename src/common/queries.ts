@@ -14,6 +14,13 @@ export const useProgress = (
     ...(onSuccessHandler && { onSuccess: onSuccessHandler }),
   });
 
+export const useTotalProgressPercentage = (isEnabled: boolean) =>
+  useQuery({
+    queryKey: ["totalProgressPercentage"],
+    queryFn: progressService.getTotalProgressPercentage,
+    enabled: isEnabled,
+  });
+
 export const useChapter = (textbookId: number, isEnabled: boolean) =>
   useQuery<Chapter[]>({
     queryKey: ["chapter", textbookId],

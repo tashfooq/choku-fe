@@ -26,11 +26,18 @@ function App() {
       <ProgressProvider>
         <AppShell
           header={<HeaderMenu />}
-          hidden={!["/tracker", "/picker", "/feedback"].includes(pathname)}
+          hidden={
+            !["/tracker", "/picker", "/feedback", "/dashboard"].includes(
+              pathname
+            )
+          }
         >
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route
+              path="/dashboard"
+              element={<AuthenticationGuard component={Dashboard} />}
+            />
             <Route
               path="/tracker"
               element={<AuthenticationGuard component={Tracker} />}
