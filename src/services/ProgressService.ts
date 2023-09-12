@@ -23,7 +23,17 @@ const updateProgress = async (prog: Progress) => {
   return response;
 };
 
+const getTotalProgressPercentage = async () => {
+  const response = await axios.get(`${progress}/percentage`, {
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token"),
+    },
+  });
+  return response.data.totalProgress;
+};
+
 export const progressService = {
   getProgress,
   updateProgress,
+  getTotalProgressPercentage,
 };
