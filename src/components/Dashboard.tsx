@@ -26,7 +26,7 @@ const Dashboard = () => {
       <Stack>
         {totalProgressPercentage && (
           <Box w={800}>
-            <Title order={5}>Total progression for selected materials:</Title>
+            <Title order={5}>Total progression for selected materials</Title>
             <Progress
               size={24}
               sections={[
