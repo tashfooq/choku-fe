@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -6,7 +6,6 @@ import {
   Text,
   Stack,
   TextInput,
-  Textarea,
 } from "@mantine/core";
 import { feedbackService } from "../services/FeedbackService";
 
@@ -32,19 +31,18 @@ const Feedback = () => {
     validateForm();
   };
 
-  const validateForm = () => {
-    if (name.trim() !== " " && email.trim() !== " " && feedback.trim() !== " ") {
-      setIsFormValid(true);
-    }
-    else {
-      setIsFormValid(false);
-    }
-  }
+  const validateForm = async () => {
+    setIsFormValid(name.trim() !== "" && email.trim() !== "" && feedback.trim() !== "")
+  };
 
   const submitFeedback = async () => {
     setIsSubmitted(true);
     await feedbackService.sendFeedback({ name, email, feedback });
   };
+
+  useEffect(() => {
+    validateForm();
+  }, [name, email, feedback]);
 
   return (
     <Center>
@@ -61,7 +59,7 @@ const Feedback = () => {
           ></TextInput>
           <TextInput
             mt={10}
-            placeholder="email@gmail.com"
+            placeholder="Email"
             value={email}
             onChange={handleEmailChange}
             disabled={isSubmitted}
