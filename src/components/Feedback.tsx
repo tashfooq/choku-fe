@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -6,7 +6,6 @@ import {
   Text,
   Stack,
   TextInput,
-  Textarea,
 } from "@mantine/core";
 import { feedbackService } from "../services/FeedbackService";
 
@@ -14,43 +13,69 @@ const Feedback = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [feedback, setFeedback] = useState("");
+  const [isFormValid, setIsFormValid] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.currentTarget.value);
+    validateForm();
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.currentTarget.value);
+    validateForm();
+  };
+
+  const handleFeedbackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFeedback(e.currentTarget.value);
+    validateForm();
+  };
+
+  const validateForm = async () => {
+    setIsFormValid(name.trim() !== "" && email.trim() !== "" && feedback.trim() !== "")
+  };
 
   const submitFeedback = async () => {
     setIsSubmitted(true);
     await feedbackService.sendFeedback({ name, email, feedback });
   };
 
+  useEffect(() => {
+    validateForm();
+  }, [name, email, feedback]);
+
   return (
     <Center>
       <Stack>
         <Box w={600}>
-          <Text>Give us Feedback!</Text>
+          <Text>Give us feedback!</Text>
           <TextInput
+            placeholder="Name"
             value={name}
-            onChange={(e) => setName(e.currentTarget.value)}
+            onChange={handleNameChange}
             disabled={isSubmitted}
             required
             label="Name"
           ></TextInput>
           <TextInput
             mt={10}
+            placeholder="Email"
             value={email}
-            onChange={(e) => setEmail(e.currentTarget.value)}
+            onChange={handleEmailChange}
             disabled={isSubmitted}
             required
             label="Email"
           ></TextInput>
-          <Textarea
+          <TextInput
             mt={10}
-            label="Feedback"
             placeholder="Your feedback is important to us!"
             value={feedback}
-            onChange={(e) => setFeedback(e.currentTarget.value)}
+            onChange={handleFeedbackChange}
             disabled={isSubmitted}
             required
-          ></Textarea>
-          <Button mt={10} onClick={submitFeedback} disabled={isSubmitted}>
+            label="Feedback"
+          ></TextInput>
+          <Button mt={10} onClick={submitFeedback} disabled={!isFormValid || isSubmitted}>
             {isSubmitted ? "Thank you for your feedback!" : "Submit"}
           </Button>
         </Box>
