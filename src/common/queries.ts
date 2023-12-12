@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { contentService } from "../services/ContentService";
 import { progressService } from "../services/ProgressService";
-import { Chapter, ProgressDto, SubChapter, SubTopic } from "../types";
+import { Chapter, Progress, ProgressDto, SubChapter, SubTopic } from "../types";
 
 export const useProgress = (
   isAuthenticated: boolean,
@@ -13,6 +13,17 @@ export const useProgress = (
     enabled: isAuthenticated,
     ...(onSuccessHandler && { onSuccess: onSuccessHandler }),
   });
+
+export const useProgressSave = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (progressPayload: Progress) =>
+      progressService.updateProgress(progressPayload),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["progress"]);
+    },
+  });
+};
 
 export const useTotalProgressPercentage = (isEnabled: boolean) =>
   useQuery({

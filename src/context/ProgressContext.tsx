@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useState } from "react";
 import { progressService } from "../services/ProgressService";
 import { Chapter, Progress, ProgressDto, SubChapter, SubTopic } from "../types";
-import { useProgress } from "../common/queries";
+import { useProgress, useProgressSave } from "../common/queries";
 import { contentService } from "../services/ContentService";
 import { useAuth0 } from "@auth0/auth0-react";
 
@@ -95,9 +95,10 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
     progressService.updateProgress(updatedProgress);
   };
 
-  const saveProgressFromPicker = (textbookIdsFromPicker?: number[]) => {
+  const SaveProgressFromPicker = (textbookIdsFromPicker?: number[]) => {
     const updatedProgress = formatProgressForSave(textbookIdsFromPicker);
-    progressService.updateProgress(updatedProgress);
+    // progressService.updateProgress(updatedProgress);
+    useProgressSave().mutate(updatedProgress);
   };
 
   return (
@@ -112,7 +113,7 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
         selectedSubTopics,
         setSelectedSubTopics,
         saveProgress,
-        saveProgressFromPicker,
+        saveProgressFromPicker: SaveProgressFromPicker,
         progress,
         progressError,
       }}

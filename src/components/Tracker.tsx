@@ -74,6 +74,7 @@ const Tracker = () => {
   useEffect(() => {
     if (progress) {
       // looking at progress.selectedTextbookIds instead of selectedTextbookIds because the latter is not updated yet
+      console.log(progress);
       if (
         progress.selectedTextbookIds &&
         progress.selectedTextbookIds.length === 0

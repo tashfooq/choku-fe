@@ -69,7 +69,7 @@ const MaterialPicker = ({
         navigate("/tracker");
       }
     } catch (e) {
-      console.error("Failed to save");
+      console.error("Failed to save", e);
     }
   };
 
