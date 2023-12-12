@@ -14,17 +14,6 @@ export const useProgress = (
     ...(onSuccessHandler && { onSuccess: onSuccessHandler }),
   });
 
-export const useProgressSave = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (progressPayload: Progress) =>
-      progressService.updateProgress(progressPayload),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["progress"]);
-    },
-  });
-};
-
 export const useTotalProgressPercentage = (isEnabled: boolean) =>
   useQuery({
     queryKey: ["totalProgressPercentage"],

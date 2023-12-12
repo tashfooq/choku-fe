@@ -59,7 +59,7 @@ const Tracker = () => {
   }, [isLoading, getAccessTokenSilently]);
 
   const {
-    saveProgress,
+    saveProgressFromTracker,
     selectedTextbookIds,
     selectedChapters,
     setSelectedChapters,
@@ -132,7 +132,10 @@ const Tracker = () => {
             >
               Update Tracker Material
             </Button>
-            <Button leftIcon={<IconDeviceFloppy />} onClick={saveProgress}>
+            <Button
+              leftIcon={<IconDeviceFloppy />}
+              onClick={saveProgressFromTracker}
+            >
               Save
             </Button>
           </div>

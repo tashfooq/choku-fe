@@ -1,9 +1,10 @@
 import { createContext, ReactNode, useState } from "react";
 import { progressService } from "../services/ProgressService";
 import { Chapter, Progress, ProgressDto, SubChapter, SubTopic } from "../types";
-import { useProgress, useProgressSave } from "../common/queries";
+import { useProgress } from "../common/queries";
 import { contentService } from "../services/ContentService";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useProgressUpdate } from "../hooks/useProgressUpdate";
 
 export type ProgressContextType = {
   selectedTextbookIds: number[];
@@ -14,7 +15,7 @@ export type ProgressContextType = {
   setSelectedSubChapters: (subChapters: SubChapter[]) => void;
   selectedSubTopics: SubTopic[];
   setSelectedSubTopics: (subTopics: SubTopic[]) => void;
-  saveProgress: () => void;
+  saveProgressFromTracker: () => void;
   saveProgressFromPicker: (textbookIdsFromPicker?: number[]) => void;
   progress: Progress | undefined;
   progressError: unknown;
@@ -28,6 +29,7 @@ const ProgressContext = createContext<ProgressContextType | null>(null);
 
 export const ProgressProvider = ({ children }: ProgressProviderProps) => {
   const { isAuthenticated } = useAuth0();
+  const { saveProgress } = useProgressUpdate();
 
   const [selectedTextbookIds, setSelectedTextbookIds] = useState<number[]>([]);
   const [selectedChapters, setSelectedChapters] = useState<Chapter[]>([]);
@@ -74,31 +76,26 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
     const chapterIds = selectedChapters.map((c) => c.id);
     const subChapterIds = selectedSubChapters.map((c) => c.id);
     const subTopicIds = selectedSubTopics.map((c) => c.id);
-    const updatedProgress: Progress = textbookIdsFromPicker
-      ? {
-          selectedTextbookIds: textbookIdsFromPicker,
-          chapterProgress: chapterIds,
-          subchapterProgress: subChapterIds,
-          subtopicProgress: subTopicIds,
-        }
-      : {
-          selectedTextbookIds,
-          chapterProgress: chapterIds,
-          subchapterProgress: subChapterIds,
-          subtopicProgress: subTopicIds,
-        };
+    const updatedProgress: Progress = {
+      selectedTextbookIds: textbookIdsFromPicker
+        ? textbookIdsFromPicker
+        : selectedTextbookIds,
+      chapterProgress: chapterIds,
+      subchapterProgress: subChapterIds,
+      subtopicProgress: subTopicIds,
+    };
     return updatedProgress;
   };
 
-  const saveProgress = () => {
+  const saveProgressFromTracker = () => {
     const updatedProgress = formatProgressForSave();
     progressService.updateProgress(updatedProgress);
   };
 
-  const SaveProgressFromPicker = (textbookIdsFromPicker?: number[]) => {
+  const saveProgressFromPicker = (textbookIdsFromPicker?: number[]) => {
     const updatedProgress = formatProgressForSave(textbookIdsFromPicker);
-    // progressService.updateProgress(updatedProgress);
-    useProgressSave().mutate(updatedProgress);
+    saveProgress(updatedProgress);
+    console.log(progress);
   };
 
   return (
@@ -112,8 +109,8 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
         setSelectedSubChapters,
         selectedSubTopics,
         setSelectedSubTopics,
-        saveProgress,
-        saveProgressFromPicker: SaveProgressFromPicker,
+        saveProgressFromTracker,
+        saveProgressFromPicker,
         progress,
         progressError,
       }}
