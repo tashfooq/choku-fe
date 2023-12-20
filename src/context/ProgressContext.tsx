@@ -1,10 +1,9 @@
 import { createContext, ReactNode, useState } from "react";
-import { progressService } from "../services/ProgressService";
 import { Chapter, Progress, ProgressDto, SubChapter, SubTopic } from "../types";
-import { useProgress } from "../common/queries";
 import { contentService } from "../services/ContentService";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useProgressUpdate } from "../hooks/useProgressUpdate";
+import useProgressFetch from "../hooks/useProgressFetch";
 
 export type ProgressContextType = {
   selectedTextbookIds: number[];
@@ -17,8 +16,8 @@ export type ProgressContextType = {
   setSelectedSubTopics: (subTopics: SubTopic[]) => void;
   saveProgressFromTracker: () => void;
   saveProgressFromPicker: (textbookIdsFromPicker?: number[]) => void;
+  initializeProgress: (data: ProgressDto) => void;
   progress: Progress | undefined;
-  progressError: unknown;
 };
 
 type ProgressProviderProps = {
@@ -65,10 +64,11 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
     setSelectedSubTopics(completedSubTopics);
   };
 
-  const { data: progress, error: progressError } = useProgress(
+  const { fetchProgressInitial } = useProgressFetch(
     isAuthenticated,
     initializeProgress
   );
+  const progress = fetchProgressInitial();
 
   const formatProgressForSave = (
     textbookIdsFromPicker?: number[]
@@ -87,15 +87,14 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
     return updatedProgress;
   };
 
-  const saveProgressFromTracker = () => {
+  const saveProgressFromTracker = async () => {
     const updatedProgress = formatProgressForSave();
-    progressService.updateProgress(updatedProgress);
+    await saveProgress(updatedProgress);
   };
 
-  const saveProgressFromPicker = (textbookIdsFromPicker?: number[]) => {
+  const saveProgressFromPicker = async (textbookIdsFromPicker?: number[]) => {
     const updatedProgress = formatProgressForSave(textbookIdsFromPicker);
-    saveProgress(updatedProgress);
-    console.log(progress);
+    await saveProgress(updatedProgress);
   };
 
   return (
@@ -111,8 +110,8 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
         setSelectedSubTopics,
         saveProgressFromTracker,
         saveProgressFromPicker,
+        initializeProgress,
         progress,
-        progressError,
       }}
     >
       {children}

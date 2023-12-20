@@ -1,17 +1,19 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { contentService } from "../services/ContentService";
 import { progressService } from "../services/ProgressService";
-import { Chapter, Progress, ProgressDto, SubChapter, SubTopic } from "../types";
+import { Chapter, ProgressDto, SubChapter, SubTopic } from "../types";
 
 export const useProgress = (
   isAuthenticated: boolean,
-  onSuccessHandler?: (data: ProgressDto) => void
+  onSuccessHandler?: (data: ProgressDto) => void,
+  onErrorHandler?: (error: any) => void
 ) =>
   useQuery<ProgressDto>({
     queryKey: ["progress"],
     queryFn: progressService.getProgress,
     enabled: isAuthenticated,
     ...(onSuccessHandler && { onSuccess: onSuccessHandler }),
+    ...(onErrorHandler && { onError: onErrorHandler }),
   });
 
 export const useTotalProgressPercentage = (isEnabled: boolean) =>

@@ -13,8 +13,8 @@ export const useProgressUpdate = (): {
       queryClient.invalidateQueries(["progress"]);
     },
   });
-  const saveProgress = (progress: Progress) => {
-    progressMutation.mutate(progress);
+  const saveProgress = async (progress: Progress) => {
+    await progressMutation.mutate(progress);
   };
   return { saveProgress };
 };

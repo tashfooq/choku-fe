@@ -59,10 +59,10 @@ const MaterialPicker = ({
     return ["Was not able to retrieve"];
   };
 
-  const saveMaterials = () => {
+  const saveMaterials = async () => {
     try {
       setSelectedTextbookIds(selected);
-      saveProgressFromPicker(selected);
+      await saveProgressFromPicker(selected);
       if (isModalView) {
         closer(false);
       } else {
