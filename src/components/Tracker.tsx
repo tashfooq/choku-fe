@@ -13,10 +13,8 @@ import ProgressContext, {
   ProgressContextType,
 } from "../context/ProgressContext";
 import { useQuery } from "@tanstack/react-query";
-import { progressService } from "../services/ProgressService";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
-import { AxiosError } from "axios";
 import {
   IconBook2,
   IconBrush,
@@ -27,8 +25,7 @@ import MaterialPicker from "./MaterialPicker";
 import { DataTable } from "mantine-datatable";
 import SubchapterTable from "./SubchapterTable";
 import { useChapter } from "../common/queries";
-import HeaderMenu from "./Header";
-import { Item, ProgressDto } from "../types";
+import { Item } from "../types";
 
 const useStyles = createStyles((theme) => ({
   expandIcon: {
@@ -59,35 +56,27 @@ const Tracker = () => {
   }, [isLoading, getAccessTokenSilently]);
 
   const {
-    saveProgress,
+    saveProgressFromTracker,
     selectedTextbookIds,
     selectedChapters,
     setSelectedChapters,
     progress,
-    progressError,
+    // progressError,
+    // initializeProgress,
   } = useContext(ProgressContext) as ProgressContextType;
+  // const { data: progress} = useProgress(isAuthenticated, initializeProgress);
   const { data: allTextbooks } = useQuery<Item[]>({
     queryKey: ["textbooks"],
     queryFn: contentService.getAllTextbooks,
   });
 
+  console.log(progress);
+
   useEffect(() => {
-    if (progress) {
-      // looking at progress.selectedTextbookIds instead of selectedTextbookIds because the latter is not updated yet
-      if (
-        progress.selectedTextbookIds &&
-        progress.selectedTextbookIds.length === 0
-      ) {
-        navigate("/picker");
-      }
+    if (selectedTextbookIds && selectedTextbookIds.length === 0) {
+      navigate("/picker");
     }
-    if (progressError && progressError instanceof AxiosError) {
-      if (progressError?.response?.status === 404) {
-        console.log("progressError", progressError);
-        navigate("/picker");
-      }
-    }
-  }, [progress, progressError, selectedTextbookIds, navigate]);
+  });
 
   const textbooks = useMemo(() => {
     return allTextbooks
@@ -131,7 +120,10 @@ const Tracker = () => {
             >
               Update Tracker Material
             </Button>
-            <Button leftIcon={<IconDeviceFloppy />} onClick={saveProgress}>
+            <Button
+              leftIcon={<IconDeviceFloppy />}
+              onClick={saveProgressFromTracker}
+            >
               Save
             </Button>
           </div>
