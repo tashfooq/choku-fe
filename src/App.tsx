@@ -36,11 +36,11 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route
               path="/dashboard"
-              element={<AuthenticationGuard component={Dashboard} />}
+              element={<Dashboard />}
             />
             <Route
               path="/tracker"
-              element={<AuthenticationGuard component={Tracker} />}
+              element={<Tracker />}
             />
             <Route
               path="/picker"
@@ -49,7 +49,7 @@ function App() {
             <Route
               path="/feedback"
               element={
-                <AuthenticationGuard component={Feedback}></AuthenticationGuard>
+                <Feedback />
               }
             />
           </Routes>
