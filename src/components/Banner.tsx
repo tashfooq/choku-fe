@@ -7,6 +7,7 @@ import {
   rem,
 } from "@mantine/core";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useClerk } from "@clerk/clerk-react";
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -83,7 +84,7 @@ const useStyles = createStyles((theme) => ({
 
 const Banner = () => {
   const { classes } = useStyles();
-  const { loginWithRedirect } = useAuth0();
+  const { openSignIn } = useClerk();
 
   return (
     <Container className={classes.wrapper} size={1400}>
@@ -112,7 +113,7 @@ const Banner = () => {
             Learn more
           </Button>
           <Button
-            onClick={() => loginWithRedirect()}
+            onClick={() => openSignIn()}
             className={classes.control}
             size="lg"
           >
