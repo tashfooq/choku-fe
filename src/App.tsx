@@ -5,7 +5,6 @@ import Tracker from "./components/Tracker";
 import MaterialPicker from "./components/MaterialPicker";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ProgressProvider } from "./context/ProgressContext";
-import { AuthenticationGuard } from "./components/AuthGuard";
 import { AppShell } from "@mantine/core";
 import HeaderMenu from "./components/Header";
 import { useLocation } from "react-router-dom";
