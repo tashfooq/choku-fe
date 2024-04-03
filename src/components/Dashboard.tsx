@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Box, Center, Progress, Stack, Title } from "@mantine/core";
-import { useAuth0 } from "@auth0/auth0-react";
 import { useTotalProgressPercentage } from "../common/queries";
 
 const Dashboard = () => {

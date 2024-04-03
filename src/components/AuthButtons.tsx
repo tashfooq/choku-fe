@@ -1,18 +1,21 @@
 import React from "react";
-// import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@mantine/core";
-import { SignedIn, SignOutButton } from "@clerk/clerk-react";
+import { SignedIn, useAuth } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 
 const AuthButtons = () => {
-  // const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
-  return (
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const onSignOut = async () => {
+    await signOut();
+    navigate("/home");
+  };
 
+  return (
     <SignedIn>
-      <SignOutButton></SignOutButton>
-      {/* <Button variant="default" onClick={() => loginWithRedirect()}> */}
-      {/*   Log in */}
-      {/* </Button> */}
-      {/* <Button>Sign up</Button> */}
+      <Button variant="default" onClick={onSignOut}>
+        Sign Out
+      </Button>
     </SignedIn>
   );
 };

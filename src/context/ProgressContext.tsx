@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useState } from "react";
 import { Chapter, Progress, ProgressDto, SubChapter, SubTopic } from "../types";
-import { contentService } from "../services/ContentService";
+import { contentService } from "../hooks/services/ContentService";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useProgressUpdate } from "../hooks/useProgressUpdate";
 import useProgressFetch from "../hooks/useProgressFetch";

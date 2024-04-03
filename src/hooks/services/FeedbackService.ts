@@ -1,5 +1,5 @@
 import axios from "axios";
-import { apiRoutes } from "../common/constants";
+import { apiRoutes } from "../../common/constants";
 
 const { feedback } = apiRoutes;
 const sendFeedback = async (feedbackPayload: {

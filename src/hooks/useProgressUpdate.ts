@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Progress } from "../types";
-import { progressService } from "../services/ProgressService";
+import { progressService } from "./services/ProgressService";
 
 export const useProgressUpdate = (): {
   saveProgress: (progress: Progress) => void;

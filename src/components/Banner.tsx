@@ -6,7 +6,6 @@ import {
   Container,
   rem,
 } from "@mantine/core";
-import { useAuth0 } from "@auth0/auth0-react";
 import { useClerk } from "@clerk/clerk-react";
 
 const useStyles = createStyles((theme) => ({
