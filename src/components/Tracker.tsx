@@ -6,11 +6,12 @@ import useCustomQueries from "../common/queries";
 
 const Tracker = () => {
   const { useProgress } = useCustomQueries();
-  const { data: progress } = useProgress();
-  const { navigate } = useNavigate();
 
-  // check if textbooks are selected within progress
-  useEffect(() => {}, [progress]);
+  const onProgressFetch = () => {
+    console.log("Fetching progress...");
+  };
+  const { data: progress } = useProgress(onProgressFetch);
+  const navigate = useNavigate();
 
   return (
     <Container size="xl" px="md">

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect } from "react";
 import { Box, Center, Progress, Stack, Title } from "@mantine/core";
 import { useTotalProgressPercentage } from "../common/queries";

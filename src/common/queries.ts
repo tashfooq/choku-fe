@@ -1,23 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
 import useContentService from "../hooks/services/ContentService";
-import { progressService } from "../hooks/services/ProgressService";
+import useProgressService from "../hooks/services/ProgressService";
 import { Chapter, ProgressDto, SubChapter, SubTopic } from "../types";
 
 const useCustomQueries = () => {
   const { getTextbooks, getChapters, getSubchapters, getSubtopics } =
     useContentService();
 
-  const { getProgress } = progressService;
+  const { getProgress, getTotalProgressPercentage } = useProgressService();
 
   const useProgress = (
-    isAuthenticated: boolean,
     onSuccessHandler?: (data: ProgressDto) => void,
     onErrorHandler?: (error: any) => void,
   ) =>
     useQuery<ProgressDto>({
       queryKey: ["progress"],
       queryFn: getProgress,
-      enabled: isAuthenticated,
       ...(onSuccessHandler && { onSuccess: onSuccessHandler }),
       ...(onErrorHandler && { onError: onErrorHandler }),
     });
@@ -25,7 +23,7 @@ const useCustomQueries = () => {
   const useTotalProgressPercentage = (isEnabled: boolean) =>
     useQuery({
       queryKey: ["totalProgressPercentage"],
-      queryFn: progressService.getTotalProgressPercentage,
+      queryFn: getTotalProgressPercentage,
       enabled: isEnabled,
     });
 

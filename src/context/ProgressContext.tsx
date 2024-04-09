@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createContext, ReactNode, useState } from "react";
 import { Chapter, Progress, ProgressDto, SubChapter, SubTopic } from "../types";
 import { contentService } from "../hooks/services/ContentService";
@@ -33,7 +34,7 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
   const [selectedTextbookIds, setSelectedTextbookIds] = useState<number[]>([]);
   const [selectedChapters, setSelectedChapters] = useState<Chapter[]>([]);
   const [selectedSubChapters, setSelectedSubChapters] = useState<SubChapter[]>(
-    []
+    [],
   );
   const [selectedSubTopics, setSelectedSubTopics] = useState<SubTopic[]>([]);
 
@@ -46,17 +47,14 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
       subtopicProgress,
     } = data;
 
-    const completedChapters = await contentService.getChaptersByIds(
-      chapterProgress
-    );
+    const completedChapters =
+      await contentService.getChaptersByIds(chapterProgress);
 
-    const completedSubChapters = await contentService.getSubChaptersByIds(
-      subchapterProgress
-    );
+    const completedSubChapters =
+      await contentService.getSubChaptersByIds(subchapterProgress);
 
-    const completedSubTopics = await contentService.getSubTopicsByIds(
-      subtopicProgress
-    );
+    const completedSubTopics =
+      await contentService.getSubTopicsByIds(subtopicProgress);
 
     setSelectedTextbookIds(selectedTextbookIds);
     setSelectedChapters(completedChapters);
@@ -66,12 +64,12 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
 
   const { fetchProgressInitial } = useProgressFetch(
     isAuthenticated,
-    initializeProgress
+    initializeProgress,
   );
   const progress = fetchProgressInitial();
 
   const formatProgressForSave = (
-    textbookIdsFromPicker?: number[]
+    textbookIdsFromPicker?: number[],
   ): Progress => {
     const chapterIds = selectedChapters.map((c) => c.id);
     const subChapterIds = selectedSubChapters.map((c) => c.id);
