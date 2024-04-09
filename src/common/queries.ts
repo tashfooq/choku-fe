@@ -4,8 +4,13 @@ import useProgressService from "../hooks/services/ProgressService";
 import { Chapter, ProgressDto, SubChapter, SubTopic } from "../types";
 
 const useCustomQueries = () => {
-  const { getTextbooks, getChapters, getSubchapters, getSubtopics } =
-    useContentService();
+  const {
+    getTextbooks,
+    getTextbooksByIds,
+    getChapters,
+    getSubchapters,
+    getSubtopics,
+  } = useContentService();
 
   const { getProgress, getTotalProgressPercentage } = useProgressService();
 
@@ -34,6 +39,12 @@ const useCustomQueries = () => {
       enabled: isEnabled,
     });
 
+  const useTextbooksByIds = (textbookIds: number[]) =>
+    useQuery({
+      queryKey: ["textbooks", textbookIds],
+      queryFn: () => getTextbooksByIds(textbookIds),
+    });
+
   const useChapter = (textbookId: number, isEnabled: boolean) =>
     useQuery<Chapter[]>({
       queryKey: ["chapter", textbookId],
@@ -57,6 +68,7 @@ const useCustomQueries = () => {
 
   return {
     useTextbooks,
+    useTextbooksByIds,
     useChapter,
     useSubChapter,
     useSubTopic,
