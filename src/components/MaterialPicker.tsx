@@ -15,6 +15,9 @@ import { IconDeviceFloppy } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import useCustomQueries from "../common/queries";
 import useTextbookSelect from "../hooks/useTextbookSelect";
+import ProgressContext, {
+  ProgressContextType,
+} from "../context/ProgressContext";
 
 type MaterialPickerProps = {
   isModalView: boolean;
@@ -30,7 +33,11 @@ const MaterialPicker = ({
   const navigate = useNavigate();
   const [selected, setSelected] = useState<any[]>([]);
   const { useTextbooks } = useCustomQueries();
-  const { setSelectedTextbooks } = useTextbookSelect();
+  const { setSelectedTextbookIds } = useContext(
+    ProgressContext,
+  ) as ProgressContextType;
+
+  console.log(setSelectedTextbookIds);
 
   const { data: textbooks, isLoading, isSuccess } = useTextbooks();
 

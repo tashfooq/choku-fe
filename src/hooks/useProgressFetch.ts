@@ -3,14 +3,16 @@ import { useNavigate } from "react-router-dom";
 import useCustomQueries from "../common/queries";
 import useTextbookSelect from "./useTextbookSelect";
 
-const useProgressFetch = (
-  isAuthenticated: boolean,
-): { fetchProgressInitial: () => ProgressDto | undefined } => {
+const useProgressFetch = (): {
+  fetchProgressInitial: () => ProgressDto | undefined;
+} => {
   const navigate = useNavigate();
+  // think about whether this needs be its own hook
   const { setSelectedTextbooks } = useTextbookSelect();
   const { useTextbooksByIds, useProgress } = useCustomQueries();
 
   const onProgressError = (error: any) => {
+    console.log(error);
     navigate("/picker");
   };
 
