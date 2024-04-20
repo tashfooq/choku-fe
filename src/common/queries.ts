@@ -1,15 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import useContentService from "../hooks/services/ContentService";
 import useProgressService from "../hooks/services/ProgressService";
-import { Chapter, ProgressDto, SubChapter, SubTopic } from "../types";
+import { Chapter, ProgressDto, SubChapter, SubTopic, Textbook } from "../types";
 
 const useCustomQueries = () => {
   const {
     getTextbooks,
     getTextbooksByIds,
     getChapters,
+    getChaptersByIds,
     getSubchapters,
+    getSubchaptersByIds,
     getSubtopics,
+    getSubtopicsByIds,
   } = useContentService();
 
   const { getProgress, getTotalProgressPercentage } = useProgressService();
@@ -40,7 +43,7 @@ const useCustomQueries = () => {
     });
 
   const useTextbooksByIds = (textbookIds: number[]) =>
-    useQuery({
+    useQuery<Textbook[]>({
       queryKey: ["textbooks", textbookIds],
       queryFn: () => getTextbooksByIds(textbookIds),
     });
@@ -52,11 +55,23 @@ const useCustomQueries = () => {
       enabled: isEnabled,
     });
 
+  const useChapterByIds = (textbookIds: number[]) =>
+    useQuery<Chapter[]>({
+      queryKey: ["chapter", textbookIds],
+      queryFn: () => getChaptersByIds(textbookIds),
+    });
+
   const useSubChapter = (chapterId: number, isAuthenticated: boolean) =>
     useQuery<SubChapter[]>({
       queryKey: ["subChapters", chapterId],
       queryFn: () => getSubchapters(chapterId),
       enabled: isAuthenticated,
+    });
+
+  const useSubChapterByIds = (chapterIds: number[]) =>
+    useQuery<SubChapter[]>({
+      queryKey: ["subChapters", chapterIds],
+      queryFn: () => getSubchaptersByIds(chapterIds),
     });
 
   const useSubTopic = (subChapterId: number, isAuthenticated: boolean) =>
@@ -66,12 +81,21 @@ const useCustomQueries = () => {
       enabled: isAuthenticated,
     });
 
+  const useSubTopicByIds = (subChapterIds: number[]) =>
+    useQuery<SubTopic[]>({
+      queryKey: ["subTopics", subChapterIds],
+      queryFn: () => getSubtopicsByIds(subChapterIds),
+    });
+
   return {
     useTextbooks,
     useTextbooksByIds,
     useChapter,
+    useChapterByIds,
     useSubChapter,
+    useSubChapterByIds,
     useSubTopic,
+    useSubTopicByIds,
     useProgress,
     useTotalProgressPercentage,
   };

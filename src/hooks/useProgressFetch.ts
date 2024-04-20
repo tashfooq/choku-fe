@@ -2,6 +2,10 @@ import { ProgressDto } from "../types";
 import { useNavigate } from "react-router-dom";
 import useCustomQueries from "../common/queries";
 import useTextbookSelect from "./useTextbookSelect";
+import { useContext } from "react";
+import ProgressContext, {
+  ProgressContextType,
+} from "../context/ProgressContext";
 
 const useProgressFetch = (): {
   fetchProgressInitial: () => ProgressDto | undefined;
@@ -9,32 +13,49 @@ const useProgressFetch = (): {
   const navigate = useNavigate();
   // think about whether this needs be its own hook
   const { setSelectedTextbooks } = useTextbookSelect();
-  const { useTextbooksByIds, useProgress } = useCustomQueries();
+  const {
+    setSelectedTextbookIds,
+    setSelectedChapters,
+    setSelectedSubChapters,
+    setSelectedSubTopics,
+  } = useContext(ProgressContext) as ProgressContextType;
+  const {
+    useTextbooksByIds,
+    useChapterByIds,
+    useSubChapterByIds,
+    useSubTopicByIds,
+    useProgress,
+  } = useCustomQueries();
 
   const onProgressError = (error: any) => {
     console.log(error);
     navigate("/picker");
+    throw error;
   };
 
   // this needs to be fleshed out to hold more progress information
   const onProgressSuccess = (data: ProgressDto) => {
-    if (data.selectedTextbookIds && data.selectedTextbookIds.length > 0) {
-      const { data: textbooks } = useTextbooksByIds(data.selectedTextbookIds);
-      setSelectedTextbooks(textbooks);
-    }
+    const {
+      selectedTextbookIds,
+      chapterProgress,
+      subchapterProgress,
+      subtopicProgress,
+    } = data;
+    const { data: textbooks } = useTextbooksByIds(selectedTextbookIds);
+    const { data: chapters } = useChapterByIds(chapterProgress);
+    const { data: subChapters } = useSubChapterByIds(subchapterProgress);
+    const { data: subTopics } = useSubTopicByIds(subtopicProgress);
+
+    setSelectedTextbooks(textbooks || []);
+    setSelectedTextbookIds(selectedTextbookIds);
+    setSelectedChapters(chapters || []);
+    setSelectedSubChapters(subChapters || []);
+    setSelectedSubTopics(subTopics || []);
   };
 
-  const {
-    data: progress,
-    isError,
-    error: progressError,
-  } = useProgress(onProgressSuccess, onProgressError);
+  const { data: progress } = useProgress(onProgressSuccess, onProgressError);
 
   const fetchProgressInitial = () => {
-    if (isError) {
-      console.log(progressError);
-      throw progressError;
-    }
     return progress;
   };
   return { fetchProgressInitial };

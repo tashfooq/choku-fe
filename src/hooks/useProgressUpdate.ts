@@ -1,20 +1,23 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Progress } from "../types";
-import { progressService } from "./services/ProgressService";
+import useProgressService from "./services/ProgressService";
 
 export const useProgressUpdate = (): {
   saveProgress: (progress: Progress) => void;
 } => {
   const queryClient = useQueryClient();
+  const { updateProgress } = useProgressService();
+
   const progressMutation = useMutation({
-    mutationFn: (progressPayload: Progress) =>
-      progressService.updateProgress(progressPayload),
+    mutationFn: (progressPayload: Progress) => updateProgress(progressPayload),
     onSuccess: () => {
       queryClient.invalidateQueries(["progress"]);
     },
   });
-  const saveProgress = async (progress: Progress) => {
-    await progressMutation.mutate(progress);
+
+  const saveProgress = (progress: Progress) => {
+    progressMutation.mutate(progress);
   };
+
   return { saveProgress };
 };
