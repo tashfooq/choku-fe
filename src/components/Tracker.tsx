@@ -6,6 +6,7 @@ const Tracker = () => {
   const { fetchProgressInitial } = useProgressFetch();
 
   const progress = fetchProgressInitial();
+  console.log(progress);
 
   return (
     <Container size="xl" px="md">

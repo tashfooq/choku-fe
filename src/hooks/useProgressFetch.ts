@@ -1,7 +1,6 @@
 import { ProgressDto } from "../types";
 import { useNavigate } from "react-router-dom";
 import useCustomQueries from "../common/queries";
-import useTextbookSelect from "./useTextbookSelect";
 import { useContext } from "react";
 import ProgressContext, {
   ProgressContextType,
@@ -12,20 +11,14 @@ const useProgressFetch = (): {
 } => {
   const navigate = useNavigate();
   // think about whether this needs be its own hook
-  const { setSelectedTextbooks } = useTextbookSelect();
   const {
     setSelectedTextbookIds,
     setSelectedChapters,
     setSelectedSubChapters,
     setSelectedSubTopics,
   } = useContext(ProgressContext) as ProgressContextType;
-  const {
-    useTextbooksByIds,
-    useChapterByIds,
-    useSubChapterByIds,
-    useSubTopicByIds,
-    useProgress,
-  } = useCustomQueries();
+  const { useChapterByIds, useSubChapterByIds, useSubTopicByIds, useProgress } =
+    useCustomQueries();
 
   const onProgressError = (error: any) => {
     console.log(error);
@@ -41,12 +34,10 @@ const useProgressFetch = (): {
       subchapterProgress,
       subtopicProgress,
     } = data;
-    const { data: textbooks } = useTextbooksByIds(selectedTextbookIds);
     const { data: chapters } = useChapterByIds(chapterProgress);
     const { data: subChapters } = useSubChapterByIds(subchapterProgress);
     const { data: subTopics } = useSubTopicByIds(subtopicProgress);
 
-    setSelectedTextbooks(textbooks || []);
     setSelectedTextbookIds(selectedTextbookIds);
     setSelectedChapters(chapters || []);
     setSelectedSubChapters(subChapters || []);
