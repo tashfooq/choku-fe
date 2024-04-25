@@ -1,13 +1,11 @@
 import { Button, Container, Group, Select } from "@mantine/core";
 import { IconBook2 } from "@tabler/icons-react";
-import { useNavigate } from "react-router-dom";
-import useCustomQueries from "../common/queries";
+import useProgressFetch from "../hooks/useProgressFetch";
 
 const Tracker = () => {
-  const { useProgress } = useCustomQueries();
+  const { fetchProgressInitial } = useProgressFetch();
 
-  const { data: progress } = useProgress();
-  const navigate = useNavigate();
+  const progress = fetchProgressInitial();
 
   return (
     <Container size="xl" px="md">
