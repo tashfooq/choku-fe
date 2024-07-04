@@ -4,6 +4,8 @@ export interface Item {
   checked?: boolean;
 }
 
+export interface Textbook extends Item {}
+
 export interface Chapter extends Item {
   textbookId: number;
 }

@@ -1,45 +1,107 @@
 import { useQuery } from "@tanstack/react-query";
-import { contentService } from "../services/ContentService";
-import { progressService } from "../services/ProgressService";
-import { Chapter, ProgressDto, SubChapter, SubTopic } from "../types";
+import useContentService from "../hooks/services/ContentService";
+import useProgressService from "../hooks/services/ProgressService";
+import { Chapter, ProgressDto, SubChapter, SubTopic, Textbook } from "../types";
 
-export const useProgress = (
-  isAuthenticated: boolean,
-  onSuccessHandler?: (data: ProgressDto) => void,
-  onErrorHandler?: (error: any) => void
-) =>
-  useQuery<ProgressDto>({
-    queryKey: ["progress"],
-    queryFn: progressService.getProgress,
-    enabled: isAuthenticated,
-    ...(onSuccessHandler && { onSuccess: onSuccessHandler }),
-    ...(onErrorHandler && { onError: onErrorHandler }),
-  });
+const useCustomQueries = () => {
+  const {
+    getTextbooks,
+    getTextbooksByIds,
+    getChapters,
+    getChaptersByIds,
+    getSubchapters,
+    getSubchaptersByIds,
+    getSubtopics,
+    getSubtopicsByIds,
+  } = useContentService();
 
-export const useTotalProgressPercentage = (isEnabled: boolean) =>
-  useQuery({
-    queryKey: ["totalProgressPercentage"],
-    queryFn: progressService.getTotalProgressPercentage,
-    enabled: isEnabled,
-  });
+  const { getProgress, getTotalProgressPercentage } = useProgressService();
 
-export const useChapter = (textbookId: number, isEnabled: boolean) =>
-  useQuery<Chapter[]>({
-    queryKey: ["chapter", textbookId],
-    queryFn: () => contentService.getChapters(textbookId),
-    enabled: isEnabled,
-  });
+  const useProgress = (
+    onSuccessHandler?: (data: ProgressDto) => void,
+    onErrorHandler?: (error: any) => void,
+  ) =>
+    useQuery<ProgressDto>({
+      queryKey: ["progress"],
+      queryFn: getProgress,
+      ...(onSuccessHandler && { onSuccess: onSuccessHandler }),
+      ...(onErrorHandler && { onError: onErrorHandler }),
+    });
 
-export const useSubChapter = (chapterId: number, isAuthenticated: boolean) =>
-  useQuery<SubChapter[]>({
-    queryKey: ["subChapters", chapterId],
-    queryFn: () => contentService.getSubChapters(chapterId),
-    enabled: isAuthenticated,
-  });
+  const useTotalProgressPercentage = (isEnabled: boolean) =>
+    useQuery({
+      queryKey: ["totalProgressPercentage"],
+      queryFn: getTotalProgressPercentage,
+      enabled: isEnabled,
+    });
 
-export const useSubTopic = (subChapterId: number, isAuthenticated: boolean) =>
-  useQuery<SubTopic[]>({
-    queryKey: ["subTopics", subChapterId],
-    queryFn: () => contentService.getSubtopics(subChapterId),
-    enabled: isAuthenticated,
-  });
+  const useTextbooks = (isEnabled: boolean = true) =>
+    useQuery({
+      queryKey: ["textbooks"],
+      queryFn: getTextbooks,
+      enabled: isEnabled,
+    });
+
+  const useTextbooksByIds = (textbookIds: number[]) =>
+    useQuery<Textbook[]>({
+      queryKey: ["textbooks", textbookIds],
+      queryFn: () => getTextbooksByIds(textbookIds),
+    });
+
+  const useChapter = (textbookId: number, isEnabled: boolean) =>
+    useQuery<Chapter[]>({
+      queryKey: ["chapter", textbookId],
+      queryFn: () => getChapters(textbookId),
+      enabled: isEnabled,
+    });
+
+  const useChapterByIds = (textbookIds: number[], isEnabled: boolean) =>
+    useQuery<Chapter[]>({
+      queryKey: ["chapter", textbookIds],
+      queryFn: () => getChaptersByIds(textbookIds),
+      enabled: isEnabled,
+    });
+
+  const useSubChapter = (chapterId: number, isEnabled: boolean) =>
+    useQuery<SubChapter[]>({
+      queryKey: ["subChapters", chapterId],
+      queryFn: () => getSubchapters(chapterId),
+      enabled: isEnabled,
+    });
+
+  const useSubChapterByIds = (chapterIds: number[], isEnabled: boolean) =>
+    useQuery<SubChapter[]>({
+      queryKey: ["subChapters", chapterIds],
+      queryFn: () => getSubchaptersByIds(chapterIds),
+      enabled: isEnabled,
+    });
+
+  const useSubTopic = (subChapterId: number, isEnabled: boolean) =>
+    useQuery<SubTopic[]>({
+      queryKey: ["subTopics", subChapterId],
+      queryFn: () => getSubtopics(subChapterId),
+      enabled: isEnabled,
+    });
+
+  const useSubTopicByIds = (subChapterIds: number[], isEnabled: boolean) =>
+    useQuery<SubTopic[]>({
+      queryKey: ["subTopics", subChapterIds],
+      queryFn: () => getSubtopicsByIds(subChapterIds),
+      enabled: isEnabled,
+    });
+
+  return {
+    useTextbooks,
+    useTextbooksByIds,
+    useChapter,
+    useChapterByIds,
+    useSubChapter,
+    useSubChapterByIds,
+    useSubTopic,
+    useSubTopicByIds,
+    useProgress,
+    useTotalProgressPercentage,
+  };
+};
+
+export default useCustomQueries;

@@ -1,16 +1,14 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
 import Tracker from "./components/Tracker";
 import MaterialPicker from "./components/MaterialPicker";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ProgressProvider } from "./context/ProgressContext";
-import { AuthenticationGuard } from "./components/AuthGuard";
 import { AppShell } from "@mantine/core";
 import HeaderMenu from "./components/Header";
 import { useLocation } from "react-router-dom";
 import Feedback from "./components/Feedback";
-import Dashboard from "./components/Dashboard";
+import { ProgressProvider } from "./context/ProgressContext";
 
 const queryClient = new QueryClient();
 
@@ -28,30 +26,19 @@ function App() {
           header={<HeaderMenu />}
           hidden={
             !["/tracker", "/picker", "/feedback", "/dashboard"].includes(
-              pathname
+              pathname,
             )
           }
         >
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route
-              path="/dashboard"
-              element={<AuthenticationGuard component={Dashboard} />}
-            />
-            <Route
-              path="/tracker"
-              element={<AuthenticationGuard component={Tracker} />}
-            />
+            <Route path="/home" element={<Home />} />
+            <Route path="/tracker" element={<Tracker />} />
             <Route
               path="/picker"
               element={<MaterialPicker isModalView={false} />}
             />
-            <Route
-              path="/feedback"
-              element={
-                <AuthenticationGuard component={Feedback}></AuthenticationGuard>
-              }
-            />
+            <Route path="/feedback" element={<Feedback />} />
           </Routes>
         </AppShell>
       </ProgressProvider>

@@ -1,32 +1,26 @@
 import { ProgressDto } from "../types";
 import { useNavigate } from "react-router-dom";
-import { useProgress } from "../common/queries";
+import useCustomQueries from "../common/queries";
+import useProgressSet from "./useProgressSet";
 
-const useProgressFetch = (
-  isAuthenticated: boolean,
-  initializer: (data: ProgressDto) => void
-): { fetchProgressInitial: () => ProgressDto | undefined } => {
+const useProgressFetch = (): {
+  fetchProgressInitial: () => ProgressDto | undefined;
+} => {
   const navigate = useNavigate();
 
+  const { useProgress } = useCustomQueries();
+
   const onProgressError = (error: any) => {
+    console.log(error);
     navigate("/picker");
+    throw error;
   };
 
-  const onProgressSuccess = (data: ProgressDto) => {
-    initializer(data);
-  };
-
-  const {
-    data: progress,
-    isError,
-    error: progressError,
-  } = useProgress(isAuthenticated, onProgressSuccess, onProgressError);
+  // setting onSuccessHandler to undefined
+  const { data: progress } = useProgress(undefined, onProgressError);
+  useProgressSet(progress);
 
   const fetchProgressInitial = () => {
-    if (isError) {
-      console.log(progressError);
-      throw progressError;
-    }
     return progress;
   };
   return { fetchProgressInitial };

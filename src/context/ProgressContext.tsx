@@ -1,9 +1,6 @@
 import { createContext, ReactNode, useState } from "react";
 import { Chapter, Progress, ProgressDto, SubChapter, SubTopic } from "../types";
-import { contentService } from "../services/ContentService";
-import { useAuth0 } from "@auth0/auth0-react";
 import { useProgressUpdate } from "../hooks/useProgressUpdate";
-import useProgressFetch from "../hooks/useProgressFetch";
 
 export type ProgressContextType = {
   selectedTextbookIds: number[];
@@ -16,8 +13,6 @@ export type ProgressContextType = {
   setSelectedSubTopics: (subTopics: SubTopic[]) => void;
   saveProgressFromTracker: () => void;
   saveProgressFromPicker: (textbookIdsFromPicker?: number[]) => void;
-  initializeProgress: (data: ProgressDto) => void;
-  progress: Progress | undefined;
 };
 
 type ProgressProviderProps = {
@@ -27,51 +22,17 @@ type ProgressProviderProps = {
 const ProgressContext = createContext<ProgressContextType | null>(null);
 
 export const ProgressProvider = ({ children }: ProgressProviderProps) => {
-  const { isAuthenticated } = useAuth0();
   const { saveProgress } = useProgressUpdate();
 
   const [selectedTextbookIds, setSelectedTextbookIds] = useState<number[]>([]);
   const [selectedChapters, setSelectedChapters] = useState<Chapter[]>([]);
   const [selectedSubChapters, setSelectedSubChapters] = useState<SubChapter[]>(
-    []
+    [],
   );
   const [selectedSubTopics, setSelectedSubTopics] = useState<SubTopic[]>([]);
 
-  // maybe we turn all these states into a useMemo that watches progress
-  const initializeProgress = async (data: ProgressDto) => {
-    const {
-      selectedTextbookIds,
-      chapterProgress,
-      subchapterProgress,
-      subtopicProgress,
-    } = data;
-
-    const completedChapters = await contentService.getChaptersByIds(
-      chapterProgress
-    );
-
-    const completedSubChapters = await contentService.getSubChaptersByIds(
-      subchapterProgress
-    );
-
-    const completedSubTopics = await contentService.getSubTopicsByIds(
-      subtopicProgress
-    );
-
-    setSelectedTextbookIds(selectedTextbookIds);
-    setSelectedChapters(completedChapters);
-    setSelectedSubChapters(completedSubChapters);
-    setSelectedSubTopics(completedSubTopics);
-  };
-
-  const { fetchProgressInitial } = useProgressFetch(
-    isAuthenticated,
-    initializeProgress
-  );
-  const progress = fetchProgressInitial();
-
   const formatProgressForSave = (
-    textbookIdsFromPicker?: number[]
+    textbookIdsFromPicker?: number[],
   ): Progress => {
     const chapterIds = selectedChapters.map((c) => c.id);
     const subChapterIds = selectedSubChapters.map((c) => c.id);
@@ -87,14 +48,14 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
     return updatedProgress;
   };
 
-  const saveProgressFromTracker = async () => {
+  const saveProgressFromTracker = () => {
     const updatedProgress = formatProgressForSave();
-    await saveProgress(updatedProgress);
+    saveProgress(updatedProgress);
   };
 
-  const saveProgressFromPicker = async (textbookIdsFromPicker?: number[]) => {
+  const saveProgressFromPicker = (textbookIdsFromPicker?: number[]) => {
     const updatedProgress = formatProgressForSave(textbookIdsFromPicker);
-    await saveProgress(updatedProgress);
+    saveProgress(updatedProgress);
   };
 
   return (
@@ -110,8 +71,6 @@ export const ProgressProvider = ({ children }: ProgressProviderProps) => {
         setSelectedSubTopics,
         saveProgressFromTracker,
         saveProgressFromPicker,
-        initializeProgress,
-        progress,
       }}
     >
       {children}

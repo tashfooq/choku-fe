@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -8,7 +8,7 @@ import {
   TextInput,
   Textarea,
 } from "@mantine/core";
-import { feedbackService } from "../services/FeedbackService";
+import { feedbackService } from "../hooks/services/FeedbackService";
 
 const Feedback = () => {
   const [name, setName] = useState("");
