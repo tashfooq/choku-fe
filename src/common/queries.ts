@@ -55,36 +55,39 @@ const useCustomQueries = () => {
       enabled: isEnabled,
     });
 
-  const useChapterByIds = (textbookIds: number[]) =>
+  const useChapterByIds = (textbookIds: number[], isEnabled: boolean) =>
     useQuery<Chapter[]>({
       queryKey: ["chapter", textbookIds],
       queryFn: () => getChaptersByIds(textbookIds),
+      enabled: isEnabled,
     });
 
-  const useSubChapter = (chapterId: number, isAuthenticated: boolean) =>
+  const useSubChapter = (chapterId: number, isEnabled: boolean) =>
     useQuery<SubChapter[]>({
       queryKey: ["subChapters", chapterId],
       queryFn: () => getSubchapters(chapterId),
-      enabled: isAuthenticated,
+      enabled: isEnabled,
     });
 
-  const useSubChapterByIds = (chapterIds: number[]) =>
+  const useSubChapterByIds = (chapterIds: number[], isEnabled: boolean) =>
     useQuery<SubChapter[]>({
       queryKey: ["subChapters", chapterIds],
       queryFn: () => getSubchaptersByIds(chapterIds),
+      enabled: isEnabled,
     });
 
-  const useSubTopic = (subChapterId: number, isAuthenticated: boolean) =>
+  const useSubTopic = (subChapterId: number, isEnabled: boolean) =>
     useQuery<SubTopic[]>({
       queryKey: ["subTopics", subChapterId],
       queryFn: () => getSubtopics(subChapterId),
-      enabled: isAuthenticated,
+      enabled: isEnabled,
     });
 
-  const useSubTopicByIds = (subChapterIds: number[]) =>
+  const useSubTopicByIds = (subChapterIds: number[], isEnabled: boolean) =>
     useQuery<SubTopic[]>({
       queryKey: ["subTopics", subChapterIds],
       queryFn: () => getSubtopicsByIds(subChapterIds),
+      enabled: isEnabled,
     });
 
   return {

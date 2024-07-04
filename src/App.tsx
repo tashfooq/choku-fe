@@ -8,7 +8,7 @@ import { AppShell } from "@mantine/core";
 import HeaderMenu from "./components/Header";
 import { useLocation } from "react-router-dom";
 import Feedback from "./components/Feedback";
-import Dashboard from "./components/Dashboard";
+import { ProgressProvider } from "./context/ProgressContext";
 
 const queryClient = new QueryClient();
 
@@ -21,24 +21,27 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppShell
-        header={<HeaderMenu />}
-        hidden={
-          !["/tracker", "/picker", "/feedback", "/dashboard"].includes(pathname)
-        }
-      >
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/tracker" element={<Tracker />} />
-          <Route
-            path="/picker"
-            element={<MaterialPicker isModalView={false} />}
-          />
-          <Route path="/feedback" element={<Feedback />} />
-        </Routes>
-      </AppShell>
+      <ProgressProvider>
+        <AppShell
+          header={<HeaderMenu />}
+          hidden={
+            !["/tracker", "/picker", "/feedback", "/dashboard"].includes(
+              pathname,
+            )
+          }
+        >
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/tracker" element={<Tracker />} />
+            <Route
+              path="/picker"
+              element={<MaterialPicker isModalView={false} />}
+            />
+            <Route path="/feedback" element={<Feedback />} />
+          </Routes>
+        </AppShell>
+      </ProgressProvider>
     </QueryClientProvider>
   );
 }
